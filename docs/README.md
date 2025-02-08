@@ -1,6 +1,6 @@
-## Virus-Phage Network Analysis
+## Virus-Host Network Analysis
 
-Take the output of VHIP and do analyses and data visualization, including VHIP predictions analysis, network visualization, and network properties calculations. The results will contribute to Eric Bastien's PhD project in the Duhaime Lab. 
+Take the output of VHIP 2.0 and do analyses and data visualization, including matrix analysis, network visualization, and network properties calculations. VHIP is an algorithm that predicts the interactions between virus and host pairs.
 
 - Input: Results from VHIP
-- Output: Network visualization and matrix
+- Output: Network visualization, matrix, and calculations
