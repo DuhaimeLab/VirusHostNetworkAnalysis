@@ -1,0 +1,107 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.0.11">
+  <diagram id="O2lLaXcDYw8-c7CT4XEb" name="Page-1">
+    <mxGraphModel dx="984" dy="624" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-3" value="Functional description" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="60" y="40" width="400" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-4" value="The software will allow users to:&lt;br&gt;&lt;br&gt;Visualize the output of VHIP 2.0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="mqBgJv5TYNKRoa8S5Hf6-3" vertex="1">
+          <mxGeometry y="30" width="400" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-8" value="User interface" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="60" y="220" width="140" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-11" value="Prioritization" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
+          <mxGeometry x="220" y="220" width="240" height="136" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-12" value="&lt;ol&gt;&lt;li&gt;Read data (tests + code)&lt;/li&gt;&lt;li&gt;Compute prediction matrix&lt;/li&gt;&lt;li&gt;Display heatmaps for predictions and probability&lt;/li&gt;&lt;li&gt;Compute random network&lt;/li&gt;&lt;li&gt;Compare prediction and random networks&lt;/li&gt;&lt;/ol&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=0;spacingRight=0;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;spacing=0;fontSize=11;labelPosition=center;verticalLabelPosition=middle;" parent="mqBgJv5TYNKRoa8S5Hf6-11" vertex="1">
+          <mxGeometry y="30" width="240" height="106" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-13" value="Goals and milestones" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
+          <mxGeometry x="60" y="370" width="400" height="157" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-14" value="&lt;ol&gt;&lt;li&gt;Write high-level documentation&lt;/li&gt;&lt;li&gt;Set up GitHub repository&lt;/li&gt;&lt;li&gt;Refine documentation and start coding&lt;/li&gt;&lt;li&gt;Prototype 1&lt;/li&gt;&lt;li&gt;Peer review&lt;/li&gt;&lt;li&gt;Prototype 2&lt;/li&gt;&lt;li&gt;Peer programming&lt;/li&gt;&lt;/ol&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="mqBgJv5TYNKRoa8S5Hf6-13" vertex="1">
+          <mxGeometry y="30" width="400" height="127" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-15" value="Proposed solutions" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
+          <mxGeometry x="60" y="545" width="400" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-16" value="&lt;ol&gt;&lt;li&gt;Transform matrix into a square to use built in functions&lt;/li&gt;&lt;li&gt;Compare to ER and Configuration models&lt;/li&gt;&lt;/ol&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="mqBgJv5TYNKRoa8S5Hf6-15" vertex="1">
+          <mxGeometry y="30" width="400" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-4" value="" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="232" y="1167" width="130" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-5" value="Input .tsv&amp;nbsp;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;results&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;from VHIP analysis&lt;/span&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="232" y="1202" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="295.5" y="1257" as="sourcePoint" />
+            <mxPoint x="295.5" y="1327" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="toakUcy7GbL1Q8m2mwp7-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="521" y="1367" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.325;entryY=0.032;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="toakUcy7GbL1Q8m2mwp7-7" target="toakUcy7GbL1Q8m2mwp7-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="376" y="1467" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="310" y="1437" />
+              <mxPoint x="442" y="1437" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="toakUcy7GbL1Q8m2mwp7-7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="192" y="1367" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-7" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="235" y="1327" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-8" value="" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="362" y="1237" as="sourcePoint" />
+            <mxPoint x="367" y="1207" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="397" y="1237" />
+              <mxPoint x="397" y="1207" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-9" value="Each set of data/file&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="396" y="1202" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-10" value="Transform/normalize the data as needed for visualizations (ex: make matrix square)&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="250.5" y="1360" width="123" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="toakUcy7GbL1Q8m2mwp7-12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="464" y="1592" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-12" value="Visualize network graph" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="401" y="1465" width="126" height="63" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-14" value="Plot heatmap for matrix" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="1334" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-17" value="Put unique viruses and unique hosts in random network (ER or configuration)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="526" y="1323" width="168" height="82" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.889;entryY=-0.048;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="toakUcy7GbL1Q8m2mwp7-17" target="toakUcy7GbL1Q8m2mwp7-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="toakUcy7GbL1Q8m2mwp7-24" value="Calculate differences, summary stats, etc." style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="401" y="1593" width="126" height="63" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
