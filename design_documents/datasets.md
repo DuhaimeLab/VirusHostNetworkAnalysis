@@ -8,3 +8,4 @@ The data will look like:
  * Validation stats:
  	* The data is the result output from VHIP 2.0, so we already know the columns will be in the same order each time. 
 	* Random models, such as ER and Configuration models, will be constructed and used as a null model to validate the results of the virus-host network model. See null_models.py for these models.
+	* Each set of data has more than one unique host and one unique virus
