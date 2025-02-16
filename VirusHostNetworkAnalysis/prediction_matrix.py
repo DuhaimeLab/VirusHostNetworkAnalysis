@@ -29,15 +29,20 @@ class PredictionMatrix:
         self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
         print('Matrix initialized') 
     
-    def fill_matrix(self):
+    def fill_matrix(self, matrix_type:str):
         # Loop through the rows in subset of data where predictions is 1
         for _, row in self.predictions.iterrows():
             virus, host = row['pairs'].split(':')
             # Find the index of the virus (row) and host (col) in the matrix
             virus_index = np.where(self.rows == virus)[0][0]
             host_index = np.where(self.columns == host)[0][0]
-            # Fill the matrix with 1
-            self.virus_host_array[virus_index][host_index] = 1
+            # Fill the matrix with 1 if matrix_type == 'predictions'
+            if matrix_type == 'prediction':
+                self.virus_host_array[virus_index][host_index] = 1
+            # fill with probability if matrix_type == 'probability'
+            else:
+                self.virus_host_array[virus_index][host_index] = row['InfProbabilities']
+
         print('Matrix filled')
 
     def sort_rows(self):
@@ -65,7 +70,7 @@ class PredictionMatrix:
         self.sort_columns()
 
     # Make the matrix a square by adding rows for the hosts and columns for the viruses
-    def expand_matrix(self):
+    def expand_matrix(self, matrix_type:str):
         # add number of hosts to the rows
         self.virus_host_array_square = np.concatenate((self.virus_host_array, np.zeros((len(self.unique_hosts), len(self.columns)), dtype=bool)), axis=0)
         self.rows_square = np.concatenate((self.rows, self.unique_hosts))
@@ -73,29 +78,32 @@ class PredictionMatrix:
         self.virus_host_array_square = np.concatenate((self.virus_host_array_square, np.zeros((len(self.rows_square), len(self.unique_viruses)), dtype=bool)), axis=1)
         self.columns_square = np.concatenate((self.columns, self.unique_viruses))
         # Fill with 1s
-        self.fill_bottom_right()
+        self.fill_bottom_right(matrix_type)
 
-    def fill_bottom_right(self):
+    def fill_bottom_right(self, matrix_type:str):
         # fill the virus-host pairs with same values as host-virus pairs
         for index, row in self.predictions.iterrows():
             virus, host = row['pairs'].split(':')
             virus_index = np.where(self.columns_square == virus)[0][0]
             host_index = np.where(self.rows_square == host)[0][0]
-            self.virus_host_array_square[host_index][virus_index] = 1
+            if matrix_type == 'prediction':
+                self.virus_host_array_square[host_index][virus_index] = 1
+            else:
+                self.virus_host_array_square[host_index][virus_index] = row['InfProbabilities']
         return self.virus_host_array_square
     
     # Make rectangular matrix
-    def make_rectangular_matrix(self):
+    def make_rectangular_matrix(self, matrix_type:str):
         self.get_unique_virus_host()
         self.initialize_matrix()
-        self.fill_matrix()
+        self.fill_matrix(matrix_type)
         self.sort_matrix()
         return self.virus_host_array
 
     # Make square matrix
-    def make_square_matrix(self):
-        self.make_rectangular_matrix()
-        self.expand_matrix()
+    def make_square_matrix(self, matrix_type:str):
+        self.make_rectangular_matrix(matrix_type)
+        self.expand_matrix(matrix_type)
         return self.virus_host_array_square
 
     # Plot the heatmap for the rectangular matrix
