@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-#import networkx as nx
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -16,6 +15,7 @@ class PredictionMatrix:
         self.unique_viruses = self.virus_host['pairs'].str.split(':').str[0].unique()
         self.unique_hosts = self.virus_host['pairs'].str.split(':').str[1].unique()
         print('Unique viruses and hosts found')
+        print('updated')
 
     # Save the matrix to a csv file
     def save_matrix(self):
@@ -23,25 +23,34 @@ class PredictionMatrix:
         print('virus_host.csv saved')
 
     # Create a matrix full of zeros and make a list of rows and column labels
-    def initialize_matrix(self):
+    def initialize_matrix(self, matrix_type:str):
         self.rows = self.unique_viruses
         self.columns = self.unique_hosts
-        self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
+        if (matrix_type == "prediction"):
+            self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
+        else:
+            self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype=float)
         print('Matrix initialized') 
     
     def fill_matrix(self, matrix_type:str):
         # Loop through the rows in subset of data where predictions is 1
-        for _, row in self.predictions.iterrows():
-            virus, host = row['pairs'].split(':')
-            # Find the index of the virus (row) and host (col) in the matrix
-            virus_index = np.where(self.rows == virus)[0][0]
-            host_index = np.where(self.columns == host)[0][0]
-            # Fill the matrix with 1 if matrix_type == 'predictions'
-            if matrix_type == 'prediction':
+        if matrix_type == "prediction":
+            for _, row in self.predictions.iterrows():
+                virus, host = row['pairs'].split(':')
+                # Find the index of the virus (row) and host (col) in the matrix
+                virus_index = np.where(self.rows == virus)[0][0]
+                host_index = np.where(self.columns == host)[0][0]
+                # Fill the matrix with 1 if matrix_type == 'predictions'
                 self.virus_host_array[virus_index][host_index] = 1
-            # fill with probability if matrix_type == 'probability'
-            else:
+        else:
+            for _, row in self.virus_host.iterrows():
+                virus, host = row['pairs'].split(':')
+                # Find the index of the virus (row) and host (col) in the matrix
+                virus_index = np.where(self.rows == virus)[0][0]
+                host_index = np.where(self.columns == host)[0][0]
+                # Fill the matrix with InfProbabilities from the dataset where virus-host pairs are present
                 self.virus_host_array[virus_index][host_index] = row['InfProbabilities']
+                #print(row['InfProbabilities'])
 
         print('Matrix filled')
 
@@ -86,7 +95,7 @@ class PredictionMatrix:
             virus, host = row['pairs'].split(':')
             virus_index = np.where(self.columns_square == virus)[0][0]
             host_index = np.where(self.rows_square == host)[0][0]
-            if matrix_type == 'prediction':
+            if matrix_type == "prediction":
                 self.virus_host_array_square[host_index][virus_index] = 1
             else:
                 self.virus_host_array_square[host_index][virus_index] = row['InfProbabilities']
@@ -94,24 +103,27 @@ class PredictionMatrix:
     
     # Make rectangular matrix
     def make_rectangular_matrix(self, matrix_type:str):
+        matrix_type1 = matrix_type.lower()
+        print("updated")
         self.get_unique_virus_host()
-        self.initialize_matrix()
-        self.fill_matrix(matrix_type)
+        self.initialize_matrix(matrix_type1)
+        self.fill_matrix(matrix_type1)
         self.sort_matrix()
         return self.virus_host_array
 
     # Make square matrix
     def make_square_matrix(self, matrix_type:str):
-        self.make_rectangular_matrix(matrix_type)
-        self.expand_matrix(matrix_type)
+        self.make_rectangular_matrix(matrix_type.lower())
+        self.expand_matrix(matrix_type.lower())
         return self.virus_host_array_square
 
     # Plot the heatmap for the rectangular matrix
-    def plot_heatmap(self):
-        sns.heatmap(self.virus_host_array, cmap="Purples")
-        # change height of heatmap
+    def plot_heatmap(self, matrix_type:str):
+        # if matrix type prediction, use purples, otherwise use warm colors
+        sns.heatmap(self.virus_host_array, cmap='Purples' if matrix_type == 'prediction' else 'YlOrRd')
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
         plt.ylabel("Viruses")
         plt.savefig("heatmap.png")
         plt.show()
+
