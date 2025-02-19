@@ -15,7 +15,6 @@ class PredictionMatrix:
         self.unique_viruses = self.virus_host['pairs'].str.split(':').str[0].unique()
         self.unique_hosts = self.virus_host['pairs'].str.split(':').str[1].unique()
         print('Unique viruses and hosts found')
-        print('updated')
 
     # Save the matrix to a csv file
     def save_matrix(self):
@@ -104,7 +103,6 @@ class PredictionMatrix:
     # Make rectangular matrix
     def make_rectangular_matrix(self, matrix_type:str):
         matrix_type1 = matrix_type.lower()
-        print("updated")
         self.get_unique_virus_host()
         self.initialize_matrix(matrix_type1)
         self.fill_matrix(matrix_type1)
