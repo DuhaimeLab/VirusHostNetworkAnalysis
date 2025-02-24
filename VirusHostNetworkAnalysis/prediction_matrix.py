@@ -135,6 +135,6 @@ class PredictionMatrix:
         matrix_title = self.file.replace('Sample_Input/', '')
         plt.title(matrix_title)
         # save the figure in the heatmaps folder
-        plt.savefig('Heatmap_' + matrix_type + '_' + matrix_title + '.png')
+        plt.savefig('Heatmaps/Heatmap_' + matrix_type + '_' + matrix_title + '.png')
         plt.show()
 
