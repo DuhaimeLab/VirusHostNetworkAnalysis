@@ -12,9 +12,10 @@ class ER:
 
     """
     def __init__(self, rows:int, columns:int, p:float):
-        self.rows = list(range(1, rows))
+        self.rows = list(range(0, rows))
         self.columns = list(range(rows, rows + columns))
         self.p = p
+        self.matrix_rand = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
 
     def initialize_graph(self):
         """ Initialize the graph with nodes and edges. """
@@ -24,34 +25,27 @@ class ER:
 
     def fill_ER_graph(self):
         """ Create a graph with n nodes and random edges between them."""
-
+       # self.initialize_graph()
         # Iterate through all pairs of nodes in the graph
         for row in self.rows:
             for col in self.columns:
-                if row != col:
-                    # set p to a random value between 0 and 1
-                    p_rand = np.random.rand()
-                    # if the random probability is less than p, add an edge between the nodes
-                    if p_rand < self.p:
-                        self.G.add_edge(row, col)
+                p_rand = np.random.rand()
+                # if the random probability is less than p, add an edge between the nodes
+                if p_rand < self.p:
+                    #self.G.add_edge(row, col)
+                    self.matrix_rand[row][col - len(self.rows)] = 1
+        print(self.matrix_rand)
+        return self.matrix_rand
 
-    def draw_graph(self):
-        """ Draw the graph using NetworkX. """
-        self.initialize_graph()
-        self.fill_ER_graph()
-        # Draw the graph
-        # blue for nodes in rows, red for nodes in columns
-        node_color = ['blue' if node in self.rows else 'red' for node in self.G.nodes()] 
-        # show nodes without any connections
-        nx.draw(self.G, with_labels=True, node_color=node_color)
-
-    def calculate_centrality(self):
-        self.betweenness = nx.betweenness_centrality(self.G)
-        self.closeness = nx.closeness_centrality(self.G)
-        self.degree = nx.degree_centrality(self.G)
-        self.eigenvector = nx.eigenvector_centrality(self.G)
-        self.pagerank = nx.pagerank(self.G)
-        print(self.degree)
+    # def calculate_centrality(self):
+    #     self.betweenness = nx.betweenness_centrality(self.G)
+    #     self.closeness = nx.closeness_centrality(self.G)
+    #     self.degree = nx.degree_centrality(self.G)
+    #     self.eigenvector = nx.eigenvector_centrality(self.G)
+    #     self.pagerank = nx.pagerank(self.G)
+    #     print(self.degree)
 
 
 # Configuration Model 
+#class CM:
+
