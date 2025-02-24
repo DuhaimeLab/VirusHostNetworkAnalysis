@@ -1,4 +1,3 @@
-from os import replace
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -63,27 +62,23 @@ class PredictionMatrix:
                 #print(row['InfProbabilities'])
 
 
-    def sort_rows(self):
+    def sort_rows_cols(self, axis:int):
         """ Find the sum of each row and move rows with the highest sum to the top of the matrix. """
-        row_counts = np.sum(self.virus_host_array, axis=1)
+        counts = np.sum(self.virus_host_array, axis=axis)
         # Sort inidices based on the counts
-        sorted_indices = np.argsort(row_counts)[::-1]
+        sorted_indices = np.argsort(counts)[::-1]
         # Sort the matrix and row names based on the sorted indices
-        self.virus_host_array = self.virus_host_array[sorted_indices]
-        self.rows = self.rows[sorted_indices]
+        if axis == 1:
+            self.rows = self.rows[sorted_indices]
+            self.virus_host_array = self.virus_host_array[sorted_indices]
+        elif axis == 0:
+            self.columns = self.columns[sorted_indices]
+            self.virus_host_array = self.virus_host_array[:, sorted_indices]
 
-    def sort_columns(self):
-        """ Find the sum of each column and move columns with the highest sum to the left of the matrix. """
-        col_counts = np.sum(self.virus_host_array, axis=0)
-        # Sort inidices based on the counts
-        sorted_indices = np.argsort(col_counts)[::-1]
-        # Sort the matrix and column names based on the sorted indices
-        self.virus_host_array = self.virus_host_array[:, sorted_indices]
-        self.columns = self.columns[sorted_indices]
 
     def sort_matrix(self):
-        self.sort_rows()
-        self.sort_columns()
+        self.sort_rows_cols(1)
+        self.sort_rows_cols(0)
 
     def expand_matrix(self, matrix_type:str):
         """ Expand the matrix to make it square by adding rows for the hosts and columns for the viruses.
