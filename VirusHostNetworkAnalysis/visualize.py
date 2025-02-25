@@ -1,6 +1,4 @@
-import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 
 class Graph:
     """ Take in a matrix and create a graph from it. The graph is initialized with a given number of rows and columns.
