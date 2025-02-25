@@ -3,7 +3,7 @@ import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
-
+# comment
 def test_square_matrix():
     # Test the unique identifiers
     test_matrix = PredictionMatrix('test_predictions.tsv')
