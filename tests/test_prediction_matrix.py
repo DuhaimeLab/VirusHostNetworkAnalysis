@@ -6,13 +6,13 @@ from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 # comment
 def test_square_matrix():
     # Test the unique identifiers
-    test_matrix = PredictionMatrix('test_predictions.tsv')
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv')
     test_matrix.get_unique_virus_host()
     assert len(test_matrix.unique_viruses) == 2
 
 def test_filling_correctly():
     # Test the matrix is filled correctly
-    test_matrix = PredictionMatrix('test_predictions.tsv')
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv')
     # fill matrix for predictions and test that it only has 1s and 0s
     test_matrix.get_unique_virus_host()
     test_matrix.initialize_matrix('prediction')
@@ -22,7 +22,7 @@ def test_filling_correctly():
 
 def test_sorting():
     # Test the matrix is sorted correctly
-    test_matrix = PredictionMatrix('test_predictions.tsv')
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv')
     test_matrix.get_unique_virus_host()
     test_matrix.initialize_matrix('prediction')
     test_matrix.fill_matrix('prediction')
