@@ -1,19 +1,19 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.0.11">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36" version="26.0.16">
   <diagram id="O2lLaXcDYw8-c7CT4XEb" name="Page-1">
-    <mxGraphModel dx="1093" dy="666" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="984" dy="573" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="mqBgJv5TYNKRoa8S5Hf6-3" value="Functional description" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="60" y="40" width="400" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-4" value="The software will allow users to:&lt;br&gt;&lt;br&gt;Visualize the output of VHIP 2.0" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="mqBgJv5TYNKRoa8S5Hf6-3" vertex="1">
+        <mxCell id="mqBgJv5TYNKRoa8S5Hf6-4" value="The software will allow users to:&lt;br&gt;&lt;br&gt;Visualize the output of VHIP 2.0 by using prediction heatmaps, probability heatmaps, and network graphs." style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;" parent="mqBgJv5TYNKRoa8S5Hf6-3" vertex="1">
           <mxGeometry y="30" width="400" height="130" as="geometry" />
         </mxCell>
         <mxCell id="mqBgJv5TYNKRoa8S5Hf6-8" value="User interface" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="60" y="220" width="140" height="56" as="geometry" />
         </mxCell>
-        <mxCell id="YYpudJKREHtWwT6xUWwp-1" value="TBD" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="mqBgJv5TYNKRoa8S5Hf6-8">
+        <mxCell id="YYpudJKREHtWwT6xUWwp-1" value="TBD" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="mqBgJv5TYNKRoa8S5Hf6-8" vertex="1">
           <mxGeometry y="30" width="140" height="26" as="geometry" />
         </mxCell>
         <mxCell id="mqBgJv5TYNKRoa8S5Hf6-11" value="Prioritization" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;align=center;" parent="1" vertex="1">
@@ -104,13 +104,13 @@
         <mxCell id="toakUcy7GbL1Q8m2mwp7-24" value="Calculate differences, summary stats, etc." style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="401" y="1593" width="126" height="63" as="geometry" />
         </mxCell>
-        <mxCell id="YYpudJKREHtWwT6xUWwp-2" value="prediction_matrix.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" vertex="1" parent="1">
+        <mxCell id="YYpudJKREHtWwT6xUWwp-2" value="prediction_matrix.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" parent="1" vertex="1">
           <mxGeometry x="296" y="1297" width="125" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="YYpudJKREHtWwT6xUWwp-3" value="null_models.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" vertex="1" parent="1">
+        <mxCell id="YYpudJKREHtWwT6xUWwp-3" value="null_models.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" parent="1" vertex="1">
           <mxGeometry x="530" y="1297" width="98" height="26" as="geometry" />
         </mxCell>
-        <mxCell id="YYpudJKREHtWwT6xUWwp-4" value="visualize.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" vertex="1" parent="1">
+        <mxCell id="YYpudJKREHtWwT6xUWwp-4" value="visualize.py" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontColor=#FF66B3;" parent="1" vertex="1">
           <mxGeometry x="314" y="1502" width="80" height="26" as="geometry" />
         </mxCell>
       </root>
