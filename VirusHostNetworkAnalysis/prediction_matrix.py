@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+import os
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -14,8 +14,12 @@ class PredictionMatrix:
 
     def __init__(self, vhip_predictions_file:str):
         self.file = vhip_predictions_file
-        self.virus_host = pd.read_csv(self.file, sep='\t')
-        self.predictions = self.virus_host[self.virus_host['Predictions'] == 1]
+        #check if this file path exists
+        if not os.path.exists(self.file):
+            raise FileNotFoundError(f"The file {self.file} does not exist.")
+        else:
+            self.virus_host = pd.read_csv(self.file, sep='\t')
+            self.predictions = self.virus_host[self.virus_host['Predictions'] == 1]
 
 
     def get_unique_virus_host(self):
