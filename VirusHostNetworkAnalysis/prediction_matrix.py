@@ -20,7 +20,18 @@ class PredictionMatrix:
         else:
             self.virus_host = pd.read_csv(self.file, sep='\t')
             self.predictions = self.virus_host[self.virus_host['Predictions'] == 1]
+            self.error_check()
 
+    def error_check(self):
+        """ Check if the input file is in the correct format. """
+        # Check if the file has the three columns needed for visualization
+        required_columns = ['pairs', 'InfProbabilities', 'Predictions']
+        for column in required_columns:
+            if column not in self.virus_host.columns:
+                raise ValueError(f"The input file is missing the required column: {column}")
+        # Check if the pairs column is in the correct format
+        if not all(self.virus_host['pairs'].str.contains(':')):
+            raise ValueError("The pairs column is not in the correct format. It should be in the format 'virus:host'")
 
     def get_unique_virus_host(self):
         """Find the unique virus names and host names in the dataset. The first column contains a virus name and host name, which are separated by a colon."""
