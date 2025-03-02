@@ -1,4 +1,5 @@
 import networkx as nx
+import matplotlib.pyplot as plt
 
 class Graph:
     """ Take in a matrix and create a graph from it. The graph is initialized with a given number of rows and columns.
@@ -25,12 +26,18 @@ class Graph:
                 if self.input_matrix[i][j] == 1:
                     self.G.add_edge(self.x_labels[i], self.y_labels[j])
 
-
     def draw_graph1(self, include_label:bool):
         """ Draw the graph using NetworkX. """
+        plt.figure(figsize=(40, 30))
         self.initialize_graph1()
         # Draw the graph
         # blue for nodes in rows, red for nodes in columns
-        node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()] 
+        node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()]  
+        # Size of the nodes should be proportiinal to the number of connections
+        #node_size = [self.G.degree(node) * 50 for node in list(self.G.nodes())]
         # show nodes without any connections
-        nx.draw(self.G, with_labels= True if include_label is True else False, node_color=node_color)
+        print(type(self.G.degree))
+        pos = nx.random_layout(self.G)
+        nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
+                node_size=50)
+        

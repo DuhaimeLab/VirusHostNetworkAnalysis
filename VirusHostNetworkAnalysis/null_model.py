@@ -25,7 +25,7 @@ class ER:
 
     def fill_ER_graph(self):
         """ Create a graph with n nodes and random edges between them."""
-       # self.initialize_graph()
+        # self.initialize_graph()
         # Iterate through all pairs of nodes in the graph
         for row in self.rows:
             for col in self.columns:
