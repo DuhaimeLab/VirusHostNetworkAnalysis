@@ -59,6 +59,7 @@ class PredictionMatrix:
     def fill_matrix(self, matrix_type:str):
         """ Fill the prediction matrix with 1s and 0s or fill the probability matrix with the InfProbabilities from the dataset."""
         if matrix_type == "prediction":
+            # Only loops through the subset of data where predicitons == 1
             for _, row in self.predictions.iterrows():
                 virus, host = row['pairs'].split(':')
                 # Find the index of the virus (row) and host (col) in the matrix

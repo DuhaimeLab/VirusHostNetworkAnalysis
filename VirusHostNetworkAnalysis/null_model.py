@@ -34,7 +34,7 @@ class ER:
                 if p_rand < self.p:
                     #self.G.add_edge(row, col)
                     self.matrix_rand[row][col - len(self.rows)] = 1
-        print(self.matrix_rand)
+        #print(self.matrix_rand)
         return self.matrix_rand
 
     # def calculate_centrality(self):
