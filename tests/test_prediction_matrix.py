@@ -43,4 +43,19 @@ def test_sorting():
     assert test_matrix.virus_host_array[0][0] == 1
     assert test_matrix.virus_host_array[-1][-1] == 0
 
-
+def test_host_host():
+    """Test the matrix is filled correctly in the host-host portions of the matrix"""
+    test_matrix = PredictionMatrix('Sample_Input/Aug4_predictions.tsv')
+    matrix_square = test_matrix.make_square_matrix('prediction')
+    for i in range(0, len(test_matrix.unique_viruses)):
+        for j in range(len(test_matrix.unique_hosts), len(test_matrix.columns_square)):
+            assert matrix_square[i][j] == 0
+   
+def test_virus_virus():
+    """Test the matrix is filled correctly in the virus-virus portions of the matrix"""
+    test_matrix = PredictionMatrix('Sample_Input/Aug4_predictions.tsv')
+    matrix_square = test_matrix.make_square_matrix('prediction')
+    for i in range(len(test_matrix.unique_viruses), len(test_matrix.rows_square)):
+        for j in range(0, len(test_matrix.unique_hosts)):
+            assert matrix_square[i][j] == 0
+               
