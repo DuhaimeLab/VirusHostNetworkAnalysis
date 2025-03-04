@@ -3,6 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
+import matplotlib.colors as mcol
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -144,7 +145,10 @@ class PredictionMatrix:
 
     def plot_heatmap(self, matrix_type:str):
         # if matrix type prediction, use purples, otherwise use warm colors
-        sns.heatmap(self.virus_host_array, cmap='Purples' if matrix_type == 'prediction' else 'YlOrRd')
+        # Make heatmap color red if 1, grey if 0.5, and blue if 0
+        # Make a user-defined colormap.
+        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["r", "white", "b"])
+        sns.heatmap(self.virus_host_array, cmap='Purples' if matrix_type == 'prediction' else cm1)
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
         plt.ylabel("Viruses")
