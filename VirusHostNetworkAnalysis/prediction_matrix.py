@@ -153,8 +153,9 @@ class PredictionMatrix:
         plt.xlabel("Hosts")
         plt.ylabel("Viruses")
         matrix_title = self.file.replace('Sample_Input/', '')
-        plt.title(matrix_title)
+        plt.title(matrix_title.split('_')[0] + ' ' + matrix_type)
         # save the figure in the heatmaps folder
-        plt.savefig('Heatmaps/Heatmap_' + matrix_type + '_' + matrix_title + '.png')
+        # get matrix name before the first underscore
+        plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
         plt.show()
 
