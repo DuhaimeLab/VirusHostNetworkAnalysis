@@ -47,5 +47,19 @@ class ER:
 
 
 # Configuration Model 
-#class CM:
+class CM:
+    """ Class to create a random graph using the Configuration Model. 
+    The graph is initialized with a given number of rows and columns, and a probability p for edge creation.
+    
+    Args:
+    rows (int): Number of rows in the graph.
+    columns (int): Number of columns in the graph.
+    p (float): Probability of edge creation between nodes.
+
+    """
+    def __init__(self, rows:int, columns:int, p:float):
+        self.rows = list(range(0, rows))
+        self.columns = list(range(rows, rows + columns))
+        self.p = p
+        self.matrix_rand = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
 

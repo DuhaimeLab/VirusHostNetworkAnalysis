@@ -148,7 +148,7 @@ class PredictionMatrix:
         # Make heatmap color red if 1, grey if 0.5, and blue if 0
         # Make a user-defined colormap.
         cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["r", "white", "b"])
-        sns.heatmap(self.virus_host_array, cmap='Purples' if matrix_type == 'prediction' else cm1)
+        sns.heatmap(self.virus_host_array, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", "cadetblue"]) if matrix_type == 'prediction' else cm1)
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
         plt.ylabel("Viruses")

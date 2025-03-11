@@ -38,9 +38,13 @@ class Graph:
         node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()]
 
         # Add one to that nodes with 0 degrees are visible
-        node_size = [(self.G.degree(node)+1) * 200 for node in self.G.nodes()]
+        node_size = [(self.G.degree(node)+1) * 150 for node in self.G.nodes()]
 
         # Set node size proportional to the degree of the node
-        pos = nx.random_layout(self.G)
+        pos = nx.spring_layout(self.G, seed=42, scale=2, k=3)
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
                 node_size = node_size)
+        
+        # Use gephi adjust graph for better visualization
+        
+
