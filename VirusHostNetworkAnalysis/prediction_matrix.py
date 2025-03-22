@@ -1,9 +1,11 @@
+from networkx import draw
 import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
 import matplotlib.colors as mcol
+import networkx as nx
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -158,4 +160,5 @@ class PredictionMatrix:
         # get matrix name before the first underscore
         plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
         plt.show()
+
 

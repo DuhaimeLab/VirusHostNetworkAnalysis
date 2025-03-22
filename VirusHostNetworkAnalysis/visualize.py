@@ -15,7 +15,7 @@ class Graph:
         self.x_labels = x_labels
         self.y_labels = y_labels
         
-        print(type(self.input_matrix))
+        #print(type(self.input_matrix))
     
     def initialize_graph1(self):
         """ Initialize the graph with nodes and edges. """
@@ -41,10 +41,15 @@ class Graph:
         node_size = [(self.G.degree(node)+1) * 150 for node in self.G.nodes()]
 
         # Set node size proportional to the degree of the node
-        pos = nx.spring_layout(self.G, seed=42, scale=2, k=3)
+        pos = nx.random_layout(self.G, seed=42)
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
                 node_size = node_size)
         
         # Use gephi adjust graph for better visualization
-        
-
+    
+    # Calculate the centrality of the graph
+    def calculate_centrality(self):
+        """ Calculate the centrality of the graph. """
+        degree = nx.degree_centrality(self.G)
+        degree_avg = sum(degree.values()) / len(degree)
+        return degree_avg
