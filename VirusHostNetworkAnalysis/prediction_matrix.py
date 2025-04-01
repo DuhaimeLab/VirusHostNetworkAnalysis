@@ -144,6 +144,15 @@ class PredictionMatrix:
         self.make_rectangular_matrix(matrix_type.lower())
         self.expand_matrix(matrix_type.lower())
         return self.virus_host_array_square
+    
+    # 576 partner task
+    def square_to_rectangular_matrix(self, matric_type:str):
+        """Convert the Square matrix back into the original rectangular matrix"""
+        self.get_unique_virus_host()
+        unique_virus_count = len(set(self.unique_viruses))
+        unique_host_count = len(set(self.unique_hosts))
+        self.virus_host_array = self.virus_host_array[:unique_virus_count, :unique_host_count]
+        return self.virus_host_array
 
     def plot_heatmap(self, matrix_type:str):
         # if matrix type prediction, use purples, otherwise use warm colors
