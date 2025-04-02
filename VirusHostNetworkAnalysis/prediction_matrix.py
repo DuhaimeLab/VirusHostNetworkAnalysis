@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import os
 import matplotlib.colors as mcol
 import networkx as nx
+import igraph as ig
+import rustworkx as rx
+from rustworkx.visualization import mpl_draw
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -41,13 +44,62 @@ class PredictionMatrix:
         self.unique_viruses = self.virus_host['pairs'].str.split(':').str[0].unique()
         self.unique_hosts = self.virus_host['pairs'].str.split(':').str[1].unique()
 
-
     def save_matrix(self):
         """ Save the matrix to a csv file. """
         np.savetxt('virus_host.csv', self.virus_host_array, delimiter=',')
         print('virus_host.csv saved')
 
-    # Create a matrix full of zeros and make a list of rows and column labels
+    def create_edge_list(self):
+        """ Create an edge list from the predictions column of the dataset."""""
+        edge_list = []
+        for _, row in self.predictions.iterrows():
+            virus, host = row['pairs'].split(':')
+            edge_list.append((str(virus), str(host)))
+        print("Edge list created with {} edges.".format(len(edge_list)))
+        # save edge list to a csv file
+        edge_df = pd.DataFrame(edge_list, columns=['Virus', 'Host'])
+        edge_df.to_csv('edge_list.csv', index=False)
+        return edge_list
+    
+    def graph_from_edge_list(self):
+        """ Create a graph from the edge list and draw it using networkx. """
+        edge_list = self.create_edge_list()
+        G = nx.Graph()
+        G.add_edges_from(edge_list)
+        plt.figure(figsize=(10, 8))
+        pos = nx.spring_layout(G, seed=42)
+        nx.draw(G, pos, with_labels=False, node_size=100, node_color= "lightblue" , font_size=10, font_weight='bold', edge_color='gray')
+        return G
+    
+    def graph_igraph(self):
+        edge_list = self.create_edge_list()
+        # graph the edges
+        g = ig.Graph.TupleList(edge_list, directed=False)
+        g.vs["label"] = g.vs.indices  # Assign labels to vertices
+        layout = g.layout("fr")  # Fruchterman-Reingold layout
+        ig.plot(g, layout=layout, vertex_size=300, vertex_color="lightblue", edge_color="gray", vertex_label=g.vs["label"], bbox=(800, 800), margin=50)
+        plt.title("Graph from Edge List using igraph")
+        plt.show()
+
+    def graph_rustwork(self):
+        edge_list = self.create_edge_list()
+        # add integer 1 to each edge to indicate presence (for visualization purposes)
+        edge_list = [(u, v, int(1)) for u, v in edge_list]  # Add a weight of 1 to each edge
+        g = rx.PyGraph()
+        g.add_edges_from(edge_list)
+        layout = rx.spring_layout(g, seed=42)
+        plt.figure(figsize=(10, 8))
+        mpl_draw(g)
+
+    
+    def centrality_analysis(self, graph):
+        print(nx.degree_centrality(graph))
+        #find average degree centrality
+        degree_centrality = nx.degree_centrality(graph)
+        avg_degree_centrality = sum(degree_centrality.values()) / len(degree_centrality)
+        print(f"Average Degree Centrality: {avg_degree_centrality:.4f}")
+
+
     def initialize_matrix(self, matrix_type:str):
         """"Create a matrix full of zeros and make a list of rows and column labels.
         
