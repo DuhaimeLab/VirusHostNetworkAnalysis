@@ -86,10 +86,6 @@ class CM:
         successful_runs = 0
         # number of viruses/columns
         num_viruses = len(self.matrix_vhip)
-        print(f"Number of viruses: {num_viruses}")
-        # number of hosts/rows
-        num_hosts = len(self.matrix_vhip[0])
-        print(f"Number of hosts: {num_hosts}")
 
         # pick random virus indices
         self.index1 = random.randint(0, num_viruses - 1)  # random index for virus 1
@@ -138,15 +134,12 @@ class CM:
         self.matrix_vhip[self.index2][random_col1] = 0
         self.matrix_vhip[self.index2][random_col2] = 1
 
-        print(f"Updated matrix at index {self.index1} and {self.index2} with new edges.")
-
     def run_config_model(self):
         # Check that function ran successfully
         vals = self.find_candidates()
         if vals is not None:
             virus1_candidates, virus2_candidates = vals
             self.update_matrix(virus1_candidates, virus2_candidates)
-            print("Matrix updated successfully.")
             print(self.matrix_vhip)
 
     def bootstrap_stats(self, iterations):
@@ -177,7 +170,7 @@ class CM:
         print(f"Average Betweenness Centrality: {avg_betweenness:.4f}")
         print(f"Average Closeness Centrality: {avg_closeness:.4f}")
         
-        return avg_betweenness
+        return avg_closeness
     
     def iterations(self, iterations):
         stats = []
@@ -186,7 +179,7 @@ class CM:
             stats.append(avg_betweenness)
 
         # plot stats in a line graph where x-axis is the iteration number and y-axis is the average betweenness centrality
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(15, 6))
         plt.plot(range(iterations), stats, marker='o', linestyle='-', color='b')
         plt.title('Average Betweenness Centrality over Iterations')
         plt.xlabel('Iteration Number')
