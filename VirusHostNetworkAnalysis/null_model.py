@@ -1,4 +1,3 @@
-from networkx import eigenvector_centrality, random_clustered_graph
 import numpy as np
 import networkx as nx
 import igraph as ig
