@@ -155,22 +155,12 @@ class CM:
                     edge_list.append((i + len(self.matrix_vhip[0]), j))
         print(f"Generated edge list after {iterations} iterations: {edge_list}")
 
-        # Use edge list to find centrality measures
         G = nx.Graph()
         G.add_edges_from(edge_list)
-        self.betweenness = nx.betweenness_centrality(G)
-        self.closeness = nx.closeness_centrality(G)
-        self.degree = nx.degree_centrality(G)
-        self.eigenvector = nx.eigenvector_centrality(G)
-        self.pagerank = nx.pagerank(G)
+        # plot degree distribution
+        self.degree_sequence = sorted([d for n, d in G.degree()], reverse=True)
 
-        # find average centrality
-        avg_betweenness = sum(self.betweenness.values())/len(self.betweenness.values())
-        avg_closeness = sum(self.closeness.values())
-        print(f"Average Betweenness Centrality: {avg_betweenness:.4f}")
-        print(f"Average Closeness Centrality: {avg_closeness:.4f}")
-        
-        return avg_closeness
+
     
     def iterations(self, iterations):
         stats = []
@@ -179,11 +169,11 @@ class CM:
             stats.append(avg_betweenness)
 
         # plot stats in a line graph where x-axis is the iteration number and y-axis is the average betweenness centrality
-        plt.figure(figsize=(15, 6))
-        plt.plot(range(iterations), stats, marker='o', linestyle='-', color='b')
-        plt.title('Average Betweenness Centrality over Iterations')
-        plt.xlabel('Iteration Number')
-        plt.ylabel('Average Betweenness Centrality')
+        plt.figure(figsize=(10, 6))
+        plt.hist(self.degree_sequence, bins= 30, color='b')
+        plt.title('Degree Distribution')
+        plt.xlabel('Degree')
+        plt.ylabel('Frequency')
         plt.grid()
         plt.show()
         return stats
