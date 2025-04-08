@@ -5,7 +5,6 @@ import igraph as ig
 import random
 import matplotlib.pyplot as plt
 
-from sympy import degree
 
 class ER:
     """ Class to create a random graph using the Erdős-Rényi model. 
