@@ -15,7 +15,7 @@ class Graph:
         
         #print(type(self.input_matrix))
     
-    def initialize_graph1(self):
+    def initialize_graph(self):
         """ Initialize the graph with nodes and edges. """
         self.G = nx.Graph()
         self.G.add_nodes_from(self.x_labels)
@@ -28,20 +28,20 @@ class Graph:
                     self.G.add_edge(self.x_labels[i], self.y_labels[j])
 
 
-    def draw_graph1(self, include_label:bool):
+    def draw_graph(self, include_label:bool):
         """ Draw the graph using NetworkX. """
         plt.figure(figsize=(40, 30))
-        self.initialize_graph1()
+        self.initialize_graph()
         # Draw the graph. Blue for nodes in rows, red for nodes in columns
         node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()]
 
         # Add one to that nodes with 0 degrees are visible
-        node_size = [(self.G.degree(node)+1) * 150 for node in self.G.nodes()]
+        node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
 
         # Set node size proportional to the degree of the node
         pos = nx.random_layout(self.G, seed=42)
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
-                node_size = node_size)
+                node_size = 100) 
         
         # Use gephi adjust graph for better visualization
     

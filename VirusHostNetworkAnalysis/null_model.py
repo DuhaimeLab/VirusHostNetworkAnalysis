@@ -1,6 +1,5 @@
 import numpy as np
 import networkx as nx
-import igraph as ig
 import random
 import matplotlib.pyplot as plt
 
@@ -29,7 +28,7 @@ class ER:
 
     def fill_ER_graph(self):
         """ Create a graph with n nodes and random edges between them."""
-        # self.initialize_graph()
+        self.initialize_graph()
         # Iterate through all pairs of nodes in the graph
         for row in self.rows:
             for col in self.columns:
@@ -157,23 +156,20 @@ class CM:
         G.add_edges_from(edge_list)
         # plot degree distribution
         self.degree_sequence = sorted([d for n, d in G.degree()], reverse=True)
-
-
     
-    def iterations(self, iterations):
+    def iterations(self, bootstraps, iterations):
         stats = []
         for i in range(iterations):
-            avg_betweenness = self.bootstrap_stats(iterations)
+            avg_betweenness = self.bootstrap_stats(bootstraps)
             stats.append(avg_betweenness)
-
-        # plot stats in a line graph where x-axis is the iteration number and y-axis is the average betweenness centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(self.degree_sequence, bins= 30, color='b')
-        plt.title('Degree Distribution')
-        plt.xlabel('Degree')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+            # plot stats in a line graph where x-axis is the iteration number and y-axis is the average betweenness centrality
+            plt.figure(figsize=(10, 6))
+            plt.hist(self.degree_sequence, bins= 30, color='b')
+            plt.title('Degree Distribution')
+            plt.xlabel('Degree')
+            plt.ylabel('Frequency')
+            plt.grid()
+            plt.show()
         return stats
 
         
