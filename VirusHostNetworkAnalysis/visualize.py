@@ -1,5 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+from sympy import deg
 
 class Graph:
     """ Take in a matrix and create a graph from it. The graph is initialized with a given number of rows and columns.
@@ -51,3 +52,24 @@ class Graph:
         degree = nx.degree_centrality(self.G)
         degree_avg = sum(degree.values()) / len(degree)
         return degree_avg
+    
+    def degree_distribution(self, degree_seq):
+        plt.figure(figsize=(10, 6))
+        virus_degree = degree_seq[0]
+        host_degree = degree_seq[1]
+
+        # Plot histograms for virus and host degree distributions side by side)
+        plt.hist(virus_degree, color='g', density=True)
+        plt.title('Virus Degree Distribution')
+        plt.xlabel('Degree')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+    
+        plt.hist(host_degree, color='b', density=True)
+        plt.title('Host Degree Distribution')
+        plt.xlabel('Degree')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+       

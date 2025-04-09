@@ -20,36 +20,65 @@ class ER:
         self.p = p
         self.matrix_rand = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
 
-    def initialize_graph(self):
-        """ Initialize the graph with nodes and edges. """
-        self.G = nx.Graph()
-        self.G.add_nodes_from(self.rows)
-        self.G.add_nodes_from(self.columns)
-
     def fill_ER_graph(self):
         """ Create a graph with n nodes and random edges between them."""
-        self.initialize_graph()
         # Iterate through all pairs of nodes in the graph
-        for row in self.rows:
-            for col in self.columns:
+        for row in range(0, len(self.rows)):
+            for col in range(0, len(self.columns)):
                 p_rand = np.random.rand()
                 # if the random probability is less than p, add an edge between the nodes
                 if p_rand < self.p:
                     #self.G.add_edge(row, col)
-                    self.matrix_rand[row][col - len(self.rows)] = 1
+                    self.matrix_rand[row][col] = 1
+        #print(self.matrix_rand)
         return self.matrix_rand
 
+    def create_edge_list(self):
+        """ Create an edge list from the matrix. """
+        edge_list = []
+        for i in range(len(self.matrix_rand)):
+            for j in range(len(self.matrix_rand[0])):
+                if self.matrix_rand[i][j] == 1:
+                    edge_list.append((i + len(self.matrix_rand[0]), j))
+        self.G = nx.Graph()
+        self.G.add_edges_from(edge_list)
+        #print(f"Generated edge list: {edge_list}")
+        return edge_list
+    
+    def draw_graph(self, include_label:bool):
+        """ Draw the graph using NetworkX. """
+        plt.figure(figsize=(40, 30))
+        # Draw the graph. Blue for nodes in rows, red for nodes in columns
+        node_color = ['blue' if node in self.rows else 'red' for node in self.G.nodes()]
+
+        # Add one to that nodes with 0 degrees are visible
+        node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
+
+        # Set node size proportional to the degree of the node
+        pos = nx.random_layout(self.G, seed=42)
+        nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
+                node_size = 100) 
+        
     def calculate_centrality(self):
-        # self.betweenness = nx.betweenness_centrality(self.G)
-        # self.closeness = nx.closeness_centrality(self.G)
-        self.degree = nx.degree_centrality(self.G)
-        # self.eigenvector = nx.eigenvector_centrality(self.G)
-        # self.pagerank = nx.pagerank(self.G)
-        #print(self.degree)
-        # find average centrality
-        avg_degree_centrality = sum(self.degree.values()) / len(self.degree)
-        print(f"Average Degree Centrality: {avg_degree_centrality:.4f}")
-        print("done")
+         # degree sequence for just the hosts
+        host_degrees = []
+        for col in range(len(self.matrix_rand[0])):
+            total = 0
+            for row in range(len(self.matrix_rand)):
+                if self.matrix_rand[row][col] == 1:
+                    total += 1
+            host_degrees.append(total)
+        
+        virus_degrees = []
+        for row in range(len(self.matrix_rand)):
+            total = 0
+            for col in range(len(self.matrix_rand[0])):
+                if self.matrix_rand[row][col] == 1:
+                    total += 1
+            virus_degrees.append(total)
+
+        return [virus_degrees, host_degrees]
+
 
 
 # Configuration Model 
@@ -63,20 +92,14 @@ class CM:
     p (float): Probability of edge creation between nodes.
 
     """
-    def __init__(self, matrix_vhip, edge_list:list):
+    def __init__(self, matrix_vhip):
         """ Initialize the Configuration Model with a given matrix and edge list."""
         # self.rows = list(range(0, rows))
         # self.columns = list(range(rows, rows + columns))
         # self.p = p
         self.matrix_vhip = matrix_vhip
-        self.edge_list = edge_list
-
-    def initialize_graph(self):
-        """ Initialize the graph using the actual data."""
-        G = nx.Graph()
-        G.add_edges_from(self.edge_list)
-
-    
+        #self.edge_list = edge_list
+  
     def find_candidates(self):
         """ Randomly selects two viruses and finds candidate edges to swap between them."""
         failed_runs = 0
@@ -89,7 +112,7 @@ class CM:
         self.index2 = random.randint(0, num_viruses - 1)  # random index for virus 2
         while self.index1 == self.index2:  # ensure they are different
             self.index2 = random.randint(0, num_viruses - 1)
-        print(f"Selected virus indices: {self.index1}, {self.index2}")
+        #print(f"Selected virus indices: {self.index1}, {self.index2}")
 
         # store the rows corresponding to the random virus indices
         virus_array1 = self.matrix_vhip[self.index1]  # get the row for random virus index 1
@@ -112,10 +135,10 @@ class CM:
         # Check if empty
         if not virus1_candidates or not virus2_candidates:
             failed_runs += 1
-            print("failed to find candidates: one of the lists is empty.")
+            #print("failed to find candidates: one of the lists is empty.")
         else:
-            print(f"Virus 1 candidates: {virus1_candidates}")
-            print(f"Virus 2 candidates: {virus2_candidates}")
+            #print(f"Virus 1 candidates: {virus1_candidates}")
+            #print(f"Virus 2 candidates: {virus2_candidates}")
             successful_runs += 1
             return virus1_candidates, virus2_candidates
         
@@ -137,7 +160,7 @@ class CM:
         if vals is not None:
             virus1_candidates, virus2_candidates = vals
             self.update_matrix(virus1_candidates, virus2_candidates)
-            print(self.matrix_vhip)
+            #print(self.matrix_vhip)
 
     def bootstrap_stats(self, iterations):
         """ Run the Configuration Model for a number of iterations to generate random graphs. """
@@ -150,27 +173,37 @@ class CM:
             for j in range(len(self.matrix_vhip[0])):
                 if self.matrix_vhip[i][j] == 1:
                     edge_list.append((i + len(self.matrix_vhip[0]), j))
-        print(f"Generated edge list after {iterations} iterations: {edge_list}")
+        #print(f"Generated edge list after {iterations} iterations: {edge_list}")
 
         G = nx.Graph()
         G.add_edges_from(edge_list)
         # plot degree distribution
-        self.degree_sequence = sorted([d for n, d in G.degree()], reverse=True)
+        self.degree_sequence = sorted([d for n, d in G.degree()])
+
+        # degree sequence for just the hosts
+        host_degrees = []
+        for col in range(len(self.matrix_vhip[0])):
+            total = 0
+            for row in range(len(self.matrix_vhip)):
+                if self.matrix_vhip[row][col] == 1:
+                    total += 1
+            host_degrees.append(total)
+        
+        virus_degrees = []
+        for row in range(len(self.matrix_vhip)):
+            total = 0
+            for col in range(len(self.matrix_vhip[0])):
+                if self.matrix_vhip[row][col] == 1:
+                    total += 1
+            virus_degrees.append(total)
+
+        return [virus_degrees, host_degrees]
     
     def iterations(self, bootstraps, iterations):
-        stats = []
+        #stats = []
         for i in range(iterations):
-            avg_betweenness = self.bootstrap_stats(bootstraps)
-            stats.append(avg_betweenness)
-            # plot stats in a line graph where x-axis is the iteration number and y-axis is the average betweenness centrality
-            plt.figure(figsize=(10, 6))
-            plt.hist(self.degree_sequence, bins= 30, color='b')
-            plt.title('Degree Distribution')
-            plt.xlabel('Degree')
-            plt.ylabel('Frequency')
-            plt.grid()
-            plt.show()
-        return stats
+           self.bootstrap_stats(bootstraps)
+        return self.degree_sequence
 
         
 
