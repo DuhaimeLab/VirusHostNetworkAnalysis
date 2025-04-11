@@ -51,8 +51,8 @@ class ER:
         # Draw the graph. Blue for nodes in rows, red for nodes in columns
         node_color = ['blue' if node in self.rows else 'red' for node in self.G.nodes()]
 
-        # Add one to that nodes with 0 degrees are visible
-        node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
+        # # Add one to that nodes with 0 degrees are visible
+        # node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
 
         # Set node size proportional to the degree of the node
         pos = nx.random_layout(self.G, seed=42)
@@ -173,12 +173,6 @@ class CM:
             for j in range(len(self.matrix_vhip[0])):
                 if self.matrix_vhip[i][j] == 1:
                     edge_list.append((i + len(self.matrix_vhip[0]), j))
-        #print(f"Generated edge list after {iterations} iterations: {edge_list}")
-
-        G = nx.Graph()
-        G.add_edges_from(edge_list)
-        # plot degree distribution
-        self.degree_sequence = sorted([d for n, d in G.degree()])
 
         # degree sequence for just the hosts
         host_degrees = []
@@ -200,10 +194,9 @@ class CM:
         return [virus_degrees, host_degrees]
     
     def iterations(self, bootstraps, iterations):
-        #stats = []
         for i in range(iterations):
-           self.bootstrap_stats(bootstraps)
-        return self.degree_sequence
+           [virus_degrees, host_degrees] = self.bootstrap_stats(bootstraps)
+        return [virus_degrees, host_degrees]
 
         
 

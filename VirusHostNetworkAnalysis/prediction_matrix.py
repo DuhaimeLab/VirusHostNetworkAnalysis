@@ -221,4 +221,3 @@ class PredictionMatrix:
         plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
         plt.show()
 
-

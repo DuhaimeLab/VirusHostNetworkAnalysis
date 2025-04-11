@@ -1,6 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from sympy import deg
 
 class Graph:
     """ Take in a matrix and create a graph from it. The graph is initialized with a given number of rows and columns.
@@ -37,7 +36,7 @@ class Graph:
         node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()]
 
         # Add one to that nodes with 0 degrees are visible
-        node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
+        #node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
 
         # Set node size proportional to the degree of the node
         pos = nx.random_layout(self.G, seed=42)
