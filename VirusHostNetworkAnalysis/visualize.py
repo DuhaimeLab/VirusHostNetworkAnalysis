@@ -30,7 +30,7 @@ class Graph:
 
     def draw_graph(self, include_label:bool):
         """ Draw the graph using NetworkX. """
-        plt.figure(figsize=(40, 30))
+        plt.figure(figsize=(20, 15))
         self.initialize_graph()
         # Draw the graph. Blue for nodes in rows, red for nodes in columns
         node_color = ['blue' if node in self.x_labels else 'red' for node in self.G.nodes()]
@@ -48,12 +48,17 @@ class Graph:
     # Calculate the centrality of the graph
     def calculate_centrality(self, max_iter):
         self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
-        # calculate eigenvector centrality for only the nodes in the x_labels
+        # calculate eigenvector centrality for only the virus and only host
         self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.x_labels}
         self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.y_labels}
 
-        #self.betweenness = nx.betweenness_centrality(self.G)
-        #self.closeness = nx.closeness_centrality(self.G)
+        self.betweenness = nx.betweenness_centrality(self.G)
+        self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.x_labels}
+        self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.y_labels}
+
+        self.closeness = nx.closeness_centrality(self.G)
+        self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.x_labels}
+        self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.y_labels}
     
     def degree_distribution(self, degree_seq):
         plt.figure(figsize=(10, 6))
@@ -80,7 +85,7 @@ class Graph:
         # Plot for thr virus eigenvector centrality
         plt.figure(figsize=(10, 6))
         plt.hist(list(self.eigenvector_virus.values()), color='g', density=True)
-        plt.title('Eigenvector Centrality')
+        plt.title('Eigenvector Centrality for Viruses')
         plt.xlabel('Eigenvector Centrality')
         plt.ylabel('Frequency')
         plt.grid()
@@ -89,8 +94,46 @@ class Graph:
         # Plot for the host eigenvector centrality
         plt.figure(figsize=(10, 6))
         plt.hist(list(self.eigenvector_host.values()), color='b', density=True)
-        plt.title('Eigenvector Centrality')
+        plt.title('Eigenvector Centrality for Hosts')
         plt.xlabel('Eigenvector Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+
+    def plot_betweenness(self):
+        # Plot for the virus betweenness centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.betweenness_virus.values()), color='g', density=True)
+        plt.title('Betweenness Centrality for Viruses')
+        plt.xlabel('Betweenness Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+
+        # Plot for the host betweenness centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.betweenness_host.values()), color='b', density=True)
+        plt.title('Betweenness Centrality for Hosts')
+        plt.xlabel('Betweenness Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+
+    def plot_closeness(self):
+        # Plot for the virus closeness centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.closeness_virus.values()), color='g', density=True)
+        plt.title('Closeness Centrality for Viruses')
+        plt.xlabel('Closeness Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+
+        # Plot for the host closeness centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.closeness_host.values()), color='b', density=True)
+        plt.title('Closeness Centrality for Hosts')
+        plt.xlabel('Closeness Centrality')
         plt.ylabel('Frequency')
         plt.grid()
         plt.show()
