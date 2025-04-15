@@ -8,10 +8,10 @@ class Graph:
     input_matrix (np.ndarray): The matrix to create the graph from.
     
     """
-    def __init__(self, input_matrix, x_labels, y_labels):
+    def __init__(self, input_matrix, virus_labels, host_labels):
         self.input_matrix = input_matrix
-        self.x_labels = x_labels
-        self.y_labels = y_labels
+        self.x_labels = virus_labels
+        self.y_labels = host_labels
         
         #print(type(self.input_matrix))
     
@@ -46,11 +46,14 @@ class Graph:
         # Use gephi adjust graph for better visualization
     
     # Calculate the centrality of the graph
-    def calculate_centrality(self):
-        """ Calculate the centrality of the graph. """
-        degree = nx.degree_centrality(self.G)
-        degree_avg = sum(degree.values()) / len(degree)
-        return degree_avg
+    def calculate_centrality(self, max_iter):
+        self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
+        # calculate eigenvector centrality for only the nodes in the x_labels
+        self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.x_labels}
+        self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.y_labels}
+
+        #self.betweenness = nx.betweenness_centrality(self.G)
+        #self.closeness = nx.closeness_centrality(self.G)
     
     def degree_distribution(self, degree_seq):
         plt.figure(figsize=(10, 6))
@@ -72,3 +75,22 @@ class Graph:
         plt.grid()
         plt.show()
        
+    def plot_eigenvectors(self):
+
+        # Plot for thr virus eigenvector centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.eigenvector_virus.values()), color='g', density=True)
+        plt.title('Eigenvector Centrality')
+        plt.xlabel('Eigenvector Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()
+
+        # Plot for the host eigenvector centrality
+        plt.figure(figsize=(10, 6))
+        plt.hist(list(self.eigenvector_host.values()), color='b', density=True)
+        plt.title('Eigenvector Centrality')
+        plt.xlabel('Eigenvector Centrality')
+        plt.ylabel('Frequency')
+        plt.grid()
+        plt.show()

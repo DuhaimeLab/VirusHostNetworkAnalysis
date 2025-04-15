@@ -1,3 +1,4 @@
+from networkx import eigenvector_centrality
 import numpy as np
 import networkx as nx
 import random
@@ -59,7 +60,7 @@ class ER:
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
                 node_size = 100) 
         
-    def calculate_centrality(self):
+    def calculate_degree(self):
          # degree sequence for just the hosts
         host_degrees = []
         for col in range(len(self.matrix_rand[0])):
@@ -196,7 +197,9 @@ class CM:
     def iterations(self, bootstraps, iterations):
         for i in range(iterations):
            [virus_degrees, host_degrees] = self.bootstrap_stats(bootstraps)
+           self.matrix_vhip
         return [virus_degrees, host_degrees]
+    
 
         
 
