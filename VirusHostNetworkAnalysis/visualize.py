@@ -43,7 +43,6 @@ class Graph:
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
                 node_size = 100) 
         
-        # Use gephi adjust graph for better visualization
     
     # Calculate the centrality of the graph
     def calculate_centrality(self, max_iter):

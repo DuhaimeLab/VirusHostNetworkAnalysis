@@ -3,6 +3,8 @@ import numpy as np
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcol
+import seaborn as sns
 
 
 class ER:
@@ -21,6 +23,24 @@ class ER:
         self.p = p
         self.matrix_rand = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
 
+    # Code shows that even when sorted, random networks will be moslty evenly spread
+    # def sort_rows_cols(self, axis:int):
+    #     """ Find the sum of each row and move rows with the highest sum to the top of the matrix. """
+    #     counts = np.sum(self.matrix_rand, axis=axis)
+    #     # Sort inidices based on the counts
+    #     sorted_indices = np.argsort(counts)[::-1]
+    #     # Sort the matrix and row names based on the sorted indices
+    #     if axis == 1:
+    #         self.rows = np.array(self.rows)[sorted_indices].tolist()
+    #         self.matrix_rand = self.matrix_rand[sorted_indices]
+    #     elif axis == 0:
+    #         self.columns = np.array(self.columns)[sorted_indices].tolist()
+    #         self.matrix_rand = self.matrix_rand[:, sorted_indices]
+    # def sort_matrix(self):
+    #     self.sort_rows_cols(1)
+    #     self.sort_rows_cols(0)
+
+
     def fill_ER_graph(self):
         """ Create a graph with n nodes and random edges between them."""
         # Iterate through all pairs of nodes in the graph
@@ -31,7 +51,6 @@ class ER:
                 if p_rand < self.p:
                     #self.G.add_edge(row, col)
                     self.matrix_rand[row][col] = 1
-        #print(self.matrix_rand)
         return self.matrix_rand
 
     def create_edge_list(self):
@@ -80,6 +99,18 @@ class ER:
 
         return [virus_degrees, host_degrees]
 
+    def plot_heatmap(self, matrix_type:str):
+        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["r", "white", "b"])
+        sns.heatmap(self.matrix_rand, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", "cadetblue"]) if matrix_type == 'prediction' else cm1)
+        plt.gcf().set_size_inches(7, 14)
+        plt.xlabel("Hosts")
+        plt.ylabel("Viruses")
+        # Replace 'your_file_name_here' with the actual file name or pass it as an argument to the class
+        matrix_title = 'your_file_name_here'.replace('Sample_Input/', '')
+        plt.title(matrix_title.split('_')[0] + ' ' + matrix_type)
+        plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
+        plt.show()
+
 
 
 # Configuration Model 
@@ -99,7 +130,6 @@ class CM:
         # self.columns = list(range(rows, rows + columns))
         # self.p = p
         self.matrix_vhip = matrix_vhip
-        #self.edge_list = edge_list
   
     def find_candidates(self):
         """ Randomly selects two viruses and finds candidate edges to swap between them."""
@@ -194,11 +224,28 @@ class CM:
 
         return [virus_degrees, host_degrees]
     
+    # def sort_rows_cols(self, axis:int):
+    #     """ Find the sum of each row and move rows with the highest sum to the top of the matrix. """
+    #     counts = np.sum(self.matrix_vhip, axis=axis)
+    #     # Sort inidices based on the counts
+    #     sorted_indices = np.argsort(counts)[::-1]
+    #     # Sort the matrix and based on the sorted indices
+    #     if axis == 1:
+    #         self.matrix_vhip = self.matrix_vhip[sorted_indices]
+    #     elif axis == 0:
+    #         self.matrix_vhip = self.matrix_vhip[:, sorted_indices]
+
+    # def sort_matrix(self):
+    #     self.sort_rows_cols(1)
+    #     self.sort_rows_cols(0)
+
     def iterations(self, bootstraps, iterations):
         for i in range(iterations):
            [virus_degrees, host_degrees] = self.bootstrap_stats(bootstraps)
-           self.matrix_vhip
+           #self.matrix_vhip
         return [virus_degrees, host_degrees]
+    
+
     
 
         
