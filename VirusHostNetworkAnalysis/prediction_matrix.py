@@ -83,15 +83,6 @@ class PredictionMatrix:
     #     plt.title("Graph from Edge List using igraph")
     #     plt.show()
 
-    
-    def centrality_analysis(self, graph):
-        print(nx.degree_centrality(graph))
-        #find average degree centrality
-        degree_centrality = nx.degree_centrality(graph)
-        avg_degree_centrality = sum(degree_centrality.values()) / len(degree_centrality)
-        print(f"Average Degree Centrality: {avg_degree_centrality:.4f}")
-
-
     def initialize_matrix(self, matrix_type:str):
         """"Create a matrix full of zeros and make a list of rows and column labels.
         
