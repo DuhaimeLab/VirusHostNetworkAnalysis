@@ -6,6 +6,9 @@ import os
 import matplotlib.colors as mcol
 import networkx as nx
 from multiprocessing import Pool
+from typing import List, Tuple
+
+from sympy import comp
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -196,7 +199,7 @@ class PredictionMatrix:
     def plot_heatmap(self, matrix_type:str):
         """ Plot the heatmap of the matrix."""
         # Make heatmap color red if 1, grey if 0.5, and blue if 0 using user-defined color map
-        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",["r", "white", "b"])
+        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(0, "r"), (0.2, "white"), (0.8, "white"), (1, "b")])
         sns.heatmap(self.virus_host_array, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", "cadetblue"]) if matrix_type == 'prediction' else cm1)
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
@@ -213,6 +216,8 @@ class Calculations:
         # Initialize the class with a sorted adjacency matrix
         self.mat = np.array(mat)
         self.sorted = sorted
+        if sorted is False:
+            self.sort()
 
     def sort_rows_cols(self, axis:int):
         """ Find the sum of each row and move rows with the highest sum to the top of the matrix. """
@@ -228,42 +233,97 @@ class Calculations:
         self.sort_rows_cols(1)
         self.sort_rows_cols(0)
 
-    def nestedness(self) -> None:
-        """Calculate nestedness using the NODF algorithm for the array."""
-        # sort matrix if it has not been done
-        if self.sorted is False:
-            self.sort()
+    # def nestedness(self) -> None:
+    #     """Calculate nestedness using the NODF algorithm for the array."""
+    #     # sort matrix if it has not been done
+    #     if self.sorted is False:
+    #         self.sort()
 
-        N_row = 0
-        N_col = 0
+    #     N_row = 0
+    #     N_col = 0
 
-        # Compare lists of rows
-        for x in range(0, len(self.mat)):
-            for y in range(x + 1, len(self.mat)):
-                N_row += self.compare(self.mat[x], self.mat[y])
-                print(x, y, self.compare(self.mat[x], self.mat[y]))
+    #     # Compare lists of rows
+    #     for x in range(0, len(self.mat)):
+    #         for y in range(x + 1, len(self.mat)):
+    #             N_row += self.compare(self.mat[x], self.mat[y])
+    #             print(x, y, self.compare(self.mat[x], self.mat[y]))
 
-        # Compare lists of cols
-        for x in range(0, int(len(self.mat[0]))):
-            for y in range(x + 1, int(len(self.mat[0]))):
-                N_col += self.compare(self.mat[0:,x], self.mat[0:,y])
-                print(x, y, self.compare(self.mat[0:,x], self.mat[0:,y]))
+    #     # Compare lists of cols
+    #     for x in range(0, int(len(self.mat[0]))):
+    #         for y in range(x + 1, int(len(self.mat[0]))):
+    #             N_col += self.compare(self.mat[0:,x], self.mat[0:,y])
+    #             print(x, y, self.compare(self.mat[0:,x], self.mat[0:,y]))
 
-        #print(N_row, N_col)
-        N_row = N_row / (len(self.mat) * (len(self.mat) - 1) / 2)
-        N_col = N_col / (len(self.mat[0]) * (len(self.mat[0]) - 1) / 2)
-        print(N_row, N_col)
-        self.nodf = (N_row + N_col) / 2
-        print(self.nodf)
+    #     #print(N_row, N_col)
+    #     N_row = N_row / (len(self.mat) * (len(self.mat) - 1) / 2)
+    #     N_col = N_col / (len(self.mat[0]) * (len(self.mat[0]) - 1) / 2)
+    #     print(N_row, N_col)
+    #     self.nodf = (N_row + N_col) / 2
+    #     print(self.nodf)
 
-    def compare(self, x, y) -> float:
+    # def compare(self, x, y) -> float:
+    #     """Compare two lists containing 0 and 1.
+
+    #     Args:
+    #         x (list[int]): first list
+    #         y (list[int]): second list
+    #     """
+
+    #     if sum(x) <= sum(y):
+    #         val = 0
+    #     elif sum(y) == 0:
+    #         val = 0
+    #     else:
+    #         counter = 0
+    #         total = 0
+    #         for i, j in zip(x, y):
+    #             if i == 1 and j == 1:
+    #                 counter += 1
+    #                 total += 1
+    #             elif i == 0 and j == 1:
+    #                 total += 1
+    #         val = counter / total
+
+    #     return val * 100
+
+
+    def nestedness_rows(self, pair):
+        """Calculate nestedness for rows using the NODF algorithm for the array."""
+        # generate list of rows to compare
+        pair1 = self.mat[pair[0],]
+        pair2 = self.mat[pair[1],]
+        N_row = self.compare(pair1, pair2)
+        #print(pair[0], pair[1], N_row)
+        #print(N_row)
+        return N_row
+
+    def nestedness_cols(self, pair):
+        """Calculate nestedness for cols using the NODF algorithm for the array."""
+        pair1 = self.mat[:, pair[0]]
+        pair2 = self.mat[:, pair[1]]
+        N_col = self.compare(pair1, pair2)  # pyright: ignore
+        return N_col
+
+    def pairs(self, axis: int = 0) -> list[tuple[int, int]]:
+        """Determine all possible i-j pairs.
+
+        Args:
+            axis (int): Axis to be used when determining all pairs.
+        """
+        lst: List[tuple[int, int]] = []
+        for i in range(0, self.mat.shape[axis]):
+            for j in range(i + 1, self.mat.shape[axis]):
+                lst.append((i, j))
+        #print(lst)
+        return lst
+
+    def compare(self, x: list[int], y: list[int]) -> float:
         """Compare two lists containing 0 and 1.
 
         Args:
             x (list[int]): first list
             y (list[int]): second list
         """
-
         if sum(x) <= sum(y):
             val = 0
         elif sum(y) == 0:
@@ -281,3 +341,41 @@ class Calculations:
 
         return val * 100
 
+    def run_parallel(self, num_procs: int = 6):
+        """Run multiple process of the compute_feature method.
+
+        This significantly improves run time by using multiple CPU cores.
+
+        Args:
+            num_procs (int): Number of core to be used.
+        """
+
+        with Pool(num_procs) as pool:
+            nrow = pool.map(self.nestedness_rows, self.pairs(axis=0))
+            ncol = pool.map(self.nestedness_cols, self.pairs(axis=1))
+
+        nrow = sum(nrow) / (len(self.mat) * (len(self.mat) - 1) / 2)
+        ncol = sum(ncol) / (len(self.mat[0]) * (len(self.mat[0]) - 1) / 2)
+        print(nrow, ncol)
+        nodf = (nrow + ncol) / 2
+        return nodf
+    
+    def calculate_degree(self):
+         # degree sequence for just the hosts
+        host_degrees = []
+        for col in range(len(self.mat[0])):
+            total = 0
+            for row in range(len(self.mat)):
+                if self.mat[row][col] == 1:
+                    total += 1
+            host_degrees.append(total)
+        
+        virus_degrees = []
+        for row in range(len(self.mat)):
+            total = 0
+            for col in range(len(self.mat[0])):
+                if self.mat[row][col] == 1:
+                    total += 1
+            virus_degrees.append(total)
+
+        return [virus_degrees, host_degrees]

@@ -40,7 +40,7 @@ class Graph:
 
         # Set node size proportional to the degree of the node
         pos = nx.random_layout(self.G, seed=42)
-        nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
+        nx.draw(self.G, pos, with_labels= include_label, node_color=node_color,
                 node_size = 100) 
         
     
@@ -50,15 +50,16 @@ class Graph:
         # calculate eigenvector centrality for only the virus and only host
         self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.x_labels}
         self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.y_labels}
-
+        print("eigen done")
         self.betweenness = nx.betweenness_centrality(self.G)
         self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.x_labels}
         self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.y_labels}
-
+        print("betweenness done")
         self.closeness = nx.closeness_centrality(self.G)
         self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.x_labels}
         self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.y_labels}
-    
+        print("closeness done")
+
     def degree_distribution(self, degree_seq):
         plt.figure(figsize=(10, 6))
         virus_degree = degree_seq[0]
