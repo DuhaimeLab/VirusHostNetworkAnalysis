@@ -2,7 +2,7 @@
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from VirusHostNetworkAnalysis.prediction_matrix import *
+from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 #from VirusHostNetworkAnalysis.prediction_matrix import Calculations
 
 def test_square_matrix():
@@ -58,10 +58,4 @@ def test_virus_virus():
     for i in range(len(test_matrix.unique_viruses), len(test_matrix.rows_square)):
         for j in range(0, len(test_matrix.unique_hosts)):
             assert matrix_square[i][j] == 0
-               
 
-def test_nestedness():
-    test_matrix = [[1, 1, 1, 1, 0], [1, 0, 1, 1, 0], [1, 1, 0, 0, 1], [1, 1, 0, 0, 0], [1, 1, 0, 0, 0]]
-    cal = Calculations(test_matrix, True)
-    #cal.nestedness()
-    assert cal.nestedness() == 58

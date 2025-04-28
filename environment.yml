@@ -5,3 +5,4 @@ dependencies:
   - matplotlib
   - scikit-learn
   - jupyter
+  - pytest

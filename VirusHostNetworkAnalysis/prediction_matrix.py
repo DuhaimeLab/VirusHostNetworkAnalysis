@@ -8,7 +8,6 @@ import networkx as nx
 from multiprocessing import Pool
 from typing import List, Tuple
 
-from sympy import comp
 
 class PredictionMatrix:
     """ Class to make a matrix from the input file. Can make square or rectangle matrices. Can also be used to make probabilty matrix.
@@ -196,10 +195,17 @@ class PredictionMatrix:
         self.virus_host_array = self.virus_host_array[:unique_virus_count, :unique_host_count]
         return self.virus_host_array
 
-    def plot_heatmap(self, matrix_type:str):
-        """ Plot the heatmap of the matrix."""
+    def plot_heatmap(self, matrix_type:str, color_map=["red", "lightpink", "white", "#a2cffe", "blue"]):
+        ranges = [0, 0.2, 0.45, 0.55, 0.8, 1]
+
+        """ Plot the heatmap of the matrix.
+        Let the user choose the colors and ranges of the heatmap.
+        Args:
+        matrix_type (str): Type of matrix to plot, which determines colors.
+        
+        """
         # Make heatmap color red if 1, grey if 0.5, and blue if 0 using user-defined color map
-        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(0, "r"), (0.2, "white"), (0.8, "white"), (1, "b")])
+        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(ranges[0], color_map[0]), (ranges[1], color_map[1]), (ranges[2], color_map[2]), (ranges[3], color_map[2]), (ranges[4], color_map[3]), (ranges[5], color_map[4])])
         sns.heatmap(self.virus_host_array, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", "cadetblue"]) if matrix_type == 'prediction' else cm1)
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
@@ -314,7 +320,6 @@ class Calculations:
         for i in range(0, self.mat.shape[axis]):
             for j in range(i + 1, self.mat.shape[axis]):
                 lst.append((i, j))
-        #print(lst)
         return lst
 
     def compare(self, x: list[int], y: list[int]) -> float:
@@ -338,7 +343,6 @@ class Calculations:
                 elif i == 0 and j == 1:
                     total += 1
             val = counter / total
-
         return val * 100
 
     def run_parallel(self, num_procs: int = 6):
