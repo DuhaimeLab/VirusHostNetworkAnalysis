@@ -1,5 +1,13 @@
+from calendar import c
 import networkx as nx
 import matplotlib.pyplot as plt
+from multiprocessing import Pool
+from functools import partial
+import numpy as np
+import matplotlib.colors as mcol
+import seaborn as sns
+from multiprocessing import Pool
+import itertools
 
 class Graph:
     """ Take in a matrix and create a graph from it. The graph is initialized with a given number of rows and columns.
@@ -45,22 +53,33 @@ class Graph:
         
     
     # Calculate the centrality of the graph
-    def calculate_centrality(self, max_iter):
-        self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
-        # calculate eigenvector centrality for only the virus and only host
-        self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.x_labels}
-        self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.y_labels}
-        print("eigen done")
-        self.betweenness = nx.betweenness_centrality(self.G)
-        self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.x_labels}
-        self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.y_labels}
-        print("betweenness done")
-        self.closeness = nx.closeness_centrality(self.G)
-        self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.x_labels}
-        self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.y_labels}
-        print("closeness done")
+    def calculate_centrality(self, max_iter, algorithm = "eigenvector"):
+        """ Calculate the centrality of the graph. """
+        if algorithm == "eigenvector":
+            self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
+            # calculate eigenvector centrality for only the virus and only host
+            self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.x_labels}
+            self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.y_labels}
+            print("eigen done")
+
+        elif algorithm == "betweenness":
+            self.betweenness = nx.betweenness_centrality(self.G)
+            self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.x_labels}
+            self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.y_labels}
+            print("betweenness done")
+
+        elif algorithm == "closeness":
+            self.closeness = nx.closeness_centrality(self.G)
+            self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.x_labels}
+            self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.y_labels}
+            print("closeness done")
+        
+        else:
+            raise ValueError("Algorithm not supported. Choose from 'eigenvector', 'betweenness', or 'closeness'.")
+    
 
     def degree_distribution(self, degree_seq):
+        """ Plot the degree distribution of the graph. """
         plt.figure(figsize=(10, 6))
         virus_degree = degree_seq[0]
         host_degree = degree_seq[1]
@@ -81,8 +100,9 @@ class Graph:
         plt.show()
        
     def plot_eigenvectors(self):
-
-        # Plot for thr virus eigenvector centrality
+        """ Plot the eigenvector centrality of the graph. """
+      
+        # Plot for the virus eigenvector centrality
         plt.figure(figsize=(10, 6))
         plt.hist(list(self.eigenvector_virus.values()), color='g', density=True)
         plt.title('Eigenvector Centrality for Viruses')
@@ -101,6 +121,8 @@ class Graph:
         plt.show()
 
     def plot_betweenness(self):
+        """ Plot the betweenness centrality of the graph. """
+
         # Plot for the virus betweenness centrality
         plt.figure(figsize=(10, 6))
         plt.hist(list(self.betweenness_virus.values()), color='g', density=True)
@@ -120,6 +142,8 @@ class Graph:
         plt.show()
 
     def plot_closeness(self):
+        """ Plot the closeness centrality of the graph. """
+
         # Plot for the virus closeness centrality
         plt.figure(figsize=(10, 6))
         plt.hist(list(self.closeness_virus.values()), color='g', density=True)
@@ -136,4 +160,34 @@ class Graph:
         plt.xlabel('Closeness Centrality')
         plt.ylabel('Frequency')
         plt.grid()
+        plt.show()
+
+    def closeness_boxplot(self, iterations):
+        # iterations is a list of dictionaries with the closeness centrality for each iteration
+        closeness_virus = []
+        closeness_host = []
+        for i in range(iterations):
+            closeness_virus.append(list(self.closeness_virus[i].values()))
+            closeness_host.append(list(self.closeness_host[i].values()))
+        plt.figure(figsize=(10, 6))
+        
+    def plot_heatmap(self, prediction_color = "indigo", color_map=["red", "lightpink", "white", "#a2cffe", "blue"], ranges=[0, 0.2, 0.45, 0.55, 0.8, 1]):
+        """ Plot the heatmap of the matrix.
+        Let the user choose the colors and ranges of the heatmap.
+        """
+
+        # Matrix type is 'prediction' if matrix only has 1s and 0s
+        matrix_type = 'prediction' if np.all(np.isin(self.input_matrix, [0, 1])) else 'probability'
+
+        # Make heatmap color red if 1, grey if 0.5, and blue if 0 using user-defined color map
+        cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(ranges[0], color_map[0]), (ranges[1], color_map[1]), (ranges[2], color_map[2]), (ranges[3], color_map[2]), (ranges[4], color_map[3]), (ranges[5], color_map[4])])
+        sns.heatmap(self.input_matrix, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", prediction_color]) if matrix_type == 'prediction' else cm1)
+        plt.gcf().set_size_inches(7, 14)
+        plt.xlabel("Hosts")
+        plt.ylabel("Viruses")
+        matrix_title = "Config Model"
+        plt.title(matrix_title.split('_')[0] + ' ' + matrix_type)
+        # save the figure in the heatmaps folder
+        # get matrix name before the first underscore
+        plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
         plt.show()

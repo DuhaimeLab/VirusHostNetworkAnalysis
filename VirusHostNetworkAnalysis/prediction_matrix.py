@@ -7,6 +7,8 @@ import matplotlib.colors as mcol
 import networkx as nx
 from multiprocessing import Pool
 from typing import List, Tuple
+from tqdm import tqdm
+from networkx.algorithms import community
 
 
 class PredictionMatrix:
@@ -74,16 +76,6 @@ class PredictionMatrix:
         pos = nx.spring_layout(G, seed=42)
         nx.draw(G, pos, with_labels=False, node_size=100, node_color= "lightblue" , font_size=10, font_weight='bold', edge_color='gray')
         return G
-    
-    # def graph_igraph(self):
-    #     edge_list = self.create_edge_list()
-    #     # graph the edges
-    #     g = ig.Graph.TupleList(edge_list, directed=False)
-    #     g.vs["label"] = g.vs.indices  # Assign labels to vertices
-    #     layout = g.layout("fr")  # Fruchterman-Reingold layout
-    #     ig.plot(g, layout=layout, vertex_size=300, vertex_color="lightblue", edge_color="gray", vertex_label=g.vs["label"], bbox=(800, 800), margin=50)
-    #     plt.title("Graph from Edge List using igraph")
-    #     plt.show()
 
     def initialize_matrix(self, matrix_type:str):
         """"Create a matrix full of zeros and make a list of rows and column labels.
@@ -127,6 +119,9 @@ class PredictionMatrix:
         counts = np.sum(self.virus_host_array, axis=axis)
         # Sort inidices based on the counts
         sorted_indices = np.argsort(counts)[::-1]
+        # Sort indices based on the counts, with ties broken by ascending order of index
+        # sorted_indices = np.lexsort((np.arange(len(counts)), -counts))
+
         # Sort the matrix and row names based on the sorted indices
         if axis == 1:
             self.rows = self.rows[sorted_indices]
@@ -195,18 +190,18 @@ class PredictionMatrix:
         self.virus_host_array = self.virus_host_array[:unique_virus_count, :unique_host_count]
         return self.virus_host_array
 
-    def plot_heatmap(self, matrix_type:str, color_map=["red", "lightpink", "white", "#a2cffe", "blue"]):
-        ranges = [0, 0.2, 0.45, 0.55, 0.8, 1]
-
+    def plot_heatmap(self, matrix_type:str, prediction_color = "indigo", color_map=["red", "lightpink", "white", "#a2cffe", "blue"], ranges=[0, 0.2, 0.45, 0.55, 0.8, 1]):
         """ Plot the heatmap of the matrix.
         Let the user choose the colors and ranges of the heatmap.
         Args:
         matrix_type (str): Type of matrix to plot, which determines colors.
-        
+        prediction_color (str): Color to use for the prediction matrix.
+        color_map (list): List of colors to use for the heatmap.
+        ranges (list): List of ranges to use for the heatmap.
         """
         # Make heatmap color red if 1, grey if 0.5, and blue if 0 using user-defined color map
         cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(ranges[0], color_map[0]), (ranges[1], color_map[1]), (ranges[2], color_map[2]), (ranges[3], color_map[2]), (ranges[4], color_map[3]), (ranges[5], color_map[4])])
-        sns.heatmap(self.virus_host_array, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", "cadetblue"]) if matrix_type == 'prediction' else cm1)
+        sns.heatmap(self.virus_host_array, cmap= mcol.LinearSegmentedColormap.from_list("MyCmapName",["white", prediction_color]) if matrix_type == 'prediction' else cm1)
         plt.gcf().set_size_inches(7, 14)
         plt.xlabel("Hosts")
         plt.ylabel("Viruses")
@@ -217,7 +212,17 @@ class PredictionMatrix:
         plt.savefig('Heatmaps/Heatmap_' + matrix_title.split('_')[0] + '_' +  matrix_type + '.png')
         plt.show()
 
+
+
 class Calculations:
+    """ Class to calculate nestedness, degree, modularity, etc (to be expanded later).
+    
+    Args:
+    mat (2d array): Matrix to be used for calculations.
+    sorted (bool): If the matrix is already sorted or not. Default is False.
+    
+    """
+
     def __init__(self, mat, sorted:bool = False):
         # Initialize the class with a sorted adjacency matrix
         self.mat = np.array(mat)
@@ -238,59 +243,6 @@ class Calculations:
     def sort(self):
         self.sort_rows_cols(1)
         self.sort_rows_cols(0)
-
-    # def nestedness(self) -> None:
-    #     """Calculate nestedness using the NODF algorithm for the array."""
-    #     # sort matrix if it has not been done
-    #     if self.sorted is False:
-    #         self.sort()
-
-    #     N_row = 0
-    #     N_col = 0
-
-    #     # Compare lists of rows
-    #     for x in range(0, len(self.mat)):
-    #         for y in range(x + 1, len(self.mat)):
-    #             N_row += self.compare(self.mat[x], self.mat[y])
-    #             print(x, y, self.compare(self.mat[x], self.mat[y]))
-
-    #     # Compare lists of cols
-    #     for x in range(0, int(len(self.mat[0]))):
-    #         for y in range(x + 1, int(len(self.mat[0]))):
-    #             N_col += self.compare(self.mat[0:,x], self.mat[0:,y])
-    #             print(x, y, self.compare(self.mat[0:,x], self.mat[0:,y]))
-
-    #     #print(N_row, N_col)
-    #     N_row = N_row / (len(self.mat) * (len(self.mat) - 1) / 2)
-    #     N_col = N_col / (len(self.mat[0]) * (len(self.mat[0]) - 1) / 2)
-    #     print(N_row, N_col)
-    #     self.nodf = (N_row + N_col) / 2
-    #     print(self.nodf)
-
-    # def compare(self, x, y) -> float:
-    #     """Compare two lists containing 0 and 1.
-
-    #     Args:
-    #         x (list[int]): first list
-    #         y (list[int]): second list
-    #     """
-
-    #     if sum(x) <= sum(y):
-    #         val = 0
-    #     elif sum(y) == 0:
-    #         val = 0
-    #     else:
-    #         counter = 0
-    #         total = 0
-    #         for i, j in zip(x, y):
-    #             if i == 1 and j == 1:
-    #                 counter += 1
-    #                 total += 1
-    #             elif i == 0 and j == 1:
-    #                 total += 1
-    #         val = counter / total
-
-    #     return val * 100
 
 
     def nestedness_rows(self, pair):
@@ -321,6 +273,8 @@ class Calculations:
             for j in range(i + 1, self.mat.shape[axis]):
                 lst.append((i, j))
         return lst
+        # equation for number of pairs
+
 
     def compare(self, x: list[int], y: list[int]) -> float:
         """Compare two lists containing 0 and 1.
@@ -355,8 +309,17 @@ class Calculations:
         """
 
         with Pool(num_procs) as pool:
-            nrow = pool.map(self.nestedness_rows, self.pairs(axis=0))
-            ncol = pool.map(self.nestedness_cols, self.pairs(axis=1))
+            #nrow = pool.map(self.nestedness_rows, self.pairs(axis=0))
+            with tqdm(total=len(self.pairs(axis=0)) + len(self.pairs(axis=1)), desc="Calculating nestedness", colour="green") as pbar:
+                nrow = []
+                for result in pool.imap_unordered(self.nestedness_rows, self.pairs(axis=0)):
+                    nrow.append(result)
+                    pbar.update(1)
+
+                ncol = []
+                for result in pool.imap_unordered(self.nestedness_cols, self.pairs(axis=1)):
+                    ncol.append(result)
+                    pbar.update(1)
 
         nrow = sum(nrow) / (len(self.mat) * (len(self.mat) - 1) / 2)
         ncol = sum(ncol) / (len(self.mat[0]) * (len(self.mat[0]) - 1) / 2)
@@ -365,7 +328,7 @@ class Calculations:
         return nodf
     
     def calculate_degree(self):
-         # degree sequence for just the hosts
+        """ Calculate the degree of each node in the graph. """
         host_degrees = []
         for col in range(len(self.mat[0])):
             total = 0
@@ -383,3 +346,13 @@ class Calculations:
             virus_degrees.append(total)
 
         return [virus_degrees, host_degrees]
+    
+
+    # Calculate modularity
+    def calculate_modularity(self):
+        """ Calculate the modularity of the graph. """
+        G = nx.from_numpy_array(self.mat)
+        partition = community.greedy_modularity_communities(G)
+        modularity = community.modularity(G, partition)
+        print("Modularity: ", modularity)
+        return modularity
