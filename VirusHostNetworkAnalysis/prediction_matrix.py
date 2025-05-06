@@ -20,15 +20,15 @@ class PredictionMatrix:
     """
 
     def __init__(self, vhip_predictions_file:str, probability:bool = False):
-        self.file = vhip_predictions_file
+        #self.file = vhip_predictions_file
         #check if this file path exists
-        if not os.path.exists(self.file):
-            raise FileNotFoundError(f"The file {self.file} does not exist.")
+        if not os.path.exists(vhip_predictions_file):
+            raise FileNotFoundError(f"The file {vhip_predictions_file} does not exist.")
         else:
-            self.virus_host = pd.read_csv(self.file, sep='\t')
+            self.virus_host = pd.read_csv(vhip_predictions_file, sep='\t')
             self.error_check()
             self.predictions = self.virus_host[self.virus_host['Predictions'] == 1]
-            self.title = self.file.split('/')[-1].split('.')[0]
+            self.title = vhip_predictions_file.split('/')[-1].split('.')[0]
             self.probability = probability
 
     def error_check(self):
@@ -91,11 +91,9 @@ class PredictionMatrix:
 
     def make_rectangular_matrix(self):
         """ Call all functions to make a rectangular matrix"""
-        #matrix_type1 = matrix_type.lower()
         self.get_unique_virus_host()
         self.initialize_matrix()
         self.fill_matrix()
-        # self.sort_matrix()
         return self.virus_host_array
 
     def save_matrix(self):

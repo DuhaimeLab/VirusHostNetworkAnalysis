@@ -54,9 +54,6 @@ class ER:
         # Draw the graph. Blue for nodes in rows, red for nodes in columns
         node_color = ['blue' if node in self.rows else 'red' for node in self.G.nodes()]
 
-        # # Add one to that nodes with 0 degrees are visible
-        # node_size = [(self.G.degree(node)+1) * 50 for node in self.G.nodes()]
-
         # Set node size proportional to the degree of the node
         pos = nx.random_layout(self.G, seed=42)
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
@@ -144,12 +141,11 @@ class ConfigurationModel:
         self.successful_runs = 0
 
         # run the configuration model for a number of iterations
-        with tqdm(total=iterations, desc="Swapping edges", colour="green") as pbar:
-            while self.successful_runs < iterations:
-                self.run_config_model()
-                pbar.update(1)
-
-        print("Successful runs: ", self.successful_runs, "Failed runs: ", self.failed_runs)
+        #with tqdm(total=iterations, desc="Swapping edges", colour="green") as pbar:
+        while self.successful_runs < iterations:
+            self.run_config_model()
+        #pbar.update(1)
+        #print("Successful runs: ", self.successful_runs, "Failed runs: ", self.failed_runs)
     
 
     

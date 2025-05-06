@@ -130,30 +130,24 @@ class BipartiteGraph:
         
     
     # Calculate the centrality of the graph
-    def calculate_centrality(self, max_iter, algorithm = "eigenvector"):
+    def calculate_centrality(self, algorithm = "eigenvector", max_iter = 1000):
         """ Calculate the centrality of the graph. """
         if algorithm == "eigenvector":
             self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
             # calculate eigenvector centrality for only the virus and only host
             self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.rows}
             self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.columns}
-            print("eigen done")
-
         elif algorithm == "betweenness":
             self.betweenness = nx.betweenness_centrality(self.G)
             self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.rows}
             self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.columns}
-            print("betweenness done")
-
         elif algorithm == "closeness":
             self.closeness = nx.closeness_centrality(self.G)
             self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.rows}
-            self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.columns}
-            print("closeness done")
-        
+            self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.columns}   
         else:
             raise ValueError("Algorithm not supported. Choose from 'eigenvector', 'betweenness', or 'closeness'.")
-    
+        
 
     def plot_degree_distribution(self):
         """ Plot the degree distribution of the graph. """
@@ -271,6 +265,35 @@ class BipartiteGraph:
         plt.savefig('Heatmaps/Heatmap_' + self.title + '_' + 'predictions' if self.probability is False else 'probabiltiies' + '.png')
         plt.show()
 
+    def plot_centrality_time_series(self, measures):
+        """ Plot the centrality measures over time. """
+        # measures is a list of lists with the centrality measures for each iteration
+        # plot line graph for each iteration on the same graph
+        plt.figure(figsize=(10, 6))
+        # plot each iteration
+        print(len(measures))
+        # plot on the same graph
+        for i in range(len(measures)):
+            plt.plot(measures[i], label=f'Iteration {i+1}')
+        plt.title('Centrality Measures Over Time')
+        plt.xlabel('Centrality Measure')
+        plt.ylabel('Frequency')
+        plt.show()
+        
+    def plot_mean_centrality_time_series(self, virus_centrality):
+        """ Plot the mean centrality measures over time. """
+        # plot a histogram of the mean centrality measures
+        means = []
+        for i in range(len(virus_centrality)):
+            means.append(np.mean(virus_centrality[i]))
+        plt.figure(figsize=(10, 6))
+        plt.plot(means)
+        plt.title('Mean Centrality Measures Over Time')
+        plt.xlabel('Time')
+        plt.ylabel('Centrality Measure')
+        plt.show()
+
+
 
 ### NESTEDNESS FIX 
     def nestedness_rows(self, pair):
@@ -279,8 +302,6 @@ class BipartiteGraph:
         pair1 = self.input_matrix[pair[0],]
         pair2 = self.input_matrix[pair[1],]
         N_row = self.compare(pair1, pair2)
-        #print(pair[0], pair[1], N_row)
-        #print(N_row)
         return N_row
 
     def nestedness_cols(self, pair):
