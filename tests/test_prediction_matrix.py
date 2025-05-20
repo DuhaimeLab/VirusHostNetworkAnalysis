@@ -1,8 +1,6 @@
 # change directory to one level up
 import os
 import sys
-
-import test
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 #from VirusHostNetworkAnalysis.prediction_matrix import Calculations

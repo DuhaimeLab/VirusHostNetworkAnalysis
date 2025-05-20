@@ -12,6 +12,6 @@ def test_total_degrees():
     test_config = ConfigurationModel(test_matrix)
     test_config.bootstrap_stats(100)
     test_properties = BipartiteGraph(test_config)
-    assert (test_properties.calculate_degree()[0] == 8)
-    assert (test_properties.calculate_degree()[1] == 8)
+    assert (sum(test_properties.calculate_degree()[0]) == 8)
+    assert (sum(test_properties.calculate_degree()[1]) == 8)
 
