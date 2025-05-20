@@ -147,13 +147,27 @@ class Pipeline():
         self.virus_metrics['degree'].append(virus_deg)
         self.host_metrics['degree'].append(host_deg)
 
+        ### CALCULATE ###
         # Nestedness
-        self.prediction_properties.run_parallel(self.num_cores)
-        # Connectedness
-        # Percent edges
+        nest = self.prediction_properties.run_parallel(self.num_cores)
+        self.nestedness.append(nest)
+        print("Nestedness: ", nest)
 
         # Centrality
         self.run_centrality(self.prediction_properties)
+
+        # Percent edges (# of edges in the matrix / # of possible edges)
+        print("Percent edges: ", self.prediction_properties.calculate_percent_edges())
+
+        # Average # of viruses per host
+        print("Average number of viruses per host: ", self.prediction_properties.calculate_average_viruses_per_host())
+
+        # Average # of hosts per virus
+        print("Average number of hosts per virus: ", self.prediction_properties.calculate_average_hosts_per_virus())
+
+        # Modularity
+        modularity = self.prediction_properties.calculate_modularity()
+        self.modularity.append(modularity)
 
     def pipeline_steps_null(self):
         """ Run the pipeline for the null model. Can be ER or CM. """
@@ -209,26 +223,6 @@ class Pipeline():
 
         # Build the unipartite matrix
         self.prediction_properties.unipartite_matrix()
-
-        ### CALCULATE ###
-        # Nestedness
-        nest = self.prediction_properties.run_parallel(self.num_cores)
-        self.nestedness.append(nest)
-        print("Nestedness: ", nest)
-
-        # Modularity
-        modularity = self.prediction_properties.calculate_modularity()
-        self.modularity.append(modularity)
-        print("Modularity: ", modularity)
-
-        # Percent edges (# of edges in the matrix / # of possible edges)
-        print("Percent edges: ", self.prediction_properties.calculate_percent_edges())
-
-        # Average # of viruses per host
-        print("Average number of viruses per host: ", self.prediction_properties.calculate_average_viruses_per_host())
-
-        # Average # of hosts per virus
-        print("Average number of hosts per virus: ", self.prediction_properties.calculate_average_hosts_per_virus())
 
         # If CM is specified, run the configuration model with the given number of swaps
         if self.null_type == "CM":

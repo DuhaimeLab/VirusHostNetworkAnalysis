@@ -1,6 +1,8 @@
 # change directory to one level up
 import os
 import sys
+
+import test
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.properties import BipartiteGraph
@@ -267,6 +269,85 @@ def test_BipartiteGraph_run_parallel():
     expected_val = 39.3
     assert round(test_properties.run_parallel(), 1) == expected_val
 
+def test_BipartiteGraph_calculate_percent_edges():
+    """ Test the calculate_percent_edges function of the BipartiteGraph class."""
+    # Test number 1 - all zero matrix
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+    test_properties.input_matrix = np.array([[0, 0, 0, 0], 
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0]])
+    assert test_properties.calculate_percent_edges() == 0
+
+    # Test number 2 - Sorted matrix
+    test_properties.input_matrix = np.array([[1, 0, 1, 0], 
+                                    [1, 1, 0, 0],
+                                    [1, 0, 0, 0],
+                                    [0, 1, 0, 0],
+                                    [1, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0]])
+    assert test_properties.calculate_percent_edges() == 0.25
+
+    # Test number 3 - Unsorted matrix
+    test_properties.input_matrix = np.array([[0, 0, 1, 0], 
+                                    [1, 1, 0, 1],
+                                    [1, 0, 1, 1],
+                                    [0, 0, 0, 0],
+                                    [1, 0, 0, 1],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 1]])
+    assert test_properties.calculate_percent_edges() == (5/14)
+
+def test_BipartiteGraph_modularity():
+    """ Test the modularity function of the BipartiteGraph class."""
+    return
+
+def test_BipartiteGraph_clustering_coefficient():
+    """ Test the clustering_coefficient function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+    test_properties.input_matrix = np.array([[1, 1, 1, 1], 
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1]])
+    test_properties.rows = np.array(['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7'])
+    test_properties.columns = np.array(['h1', 'h2', 'h3', 'h4'])
+    print(test_properties.input_matrix)
+    test_properties.initialize_graph()
+    print(test_properties.G.edges())
+    assert test_properties.calculate_clustering_coefficient() == 1
+    
+    test_properties.input_matrix = np.array([[0, 0, 0, 0], 
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0]])
+    assert test_properties.calculate_clustering_coefficient() == 0
+
+    test_properties.input_matrix = np.array([[0, 1, 1, 1],
+                                             [1, 0, 1, 0],
+                                             [1, 1, 0, 0],
+                                             [1, 0, 0, 0]])
+    test_properties.rows = np.array(['v1', 'v2', 'v3', 'v4'])
+    test_properties.columns = np.array(['h1', 'h2', 'h3', 'h4'])
+    print(test_properties.input_matrix)
+    print(test_properties.G.edges())
+    assert test_properties.calculate_clustering_coefficient() == (1/3)
+
+
+    
 
 
     

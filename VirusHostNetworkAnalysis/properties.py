@@ -413,7 +413,8 @@ class BipartiteGraph:
         # Plot a boxplot of the centrality measures for each iteration on one graph
         plt.figure(figsize=(10, 6))
         for i in range(len(measures)):
-            plt.boxplot(measures[i], positions=[i])
+            # fill the boxplot with a color
+            plt.boxplot(measures[i], positions=[i], patch_artist=True, boxprops=dict(facecolor='aliceblue', color='black'), medianprops=dict(color='black'))
         plt.title('Centrality Measures Over Time')
         plt.xlabel('Iteration')
         plt.ylabel(centrality_measure)
@@ -610,12 +611,12 @@ class BipartiteGraph:
     def calculate_percent_edges(self):
         """ Calculate the percent of edges in the graph. """
         # count 1s in the matrix
-        return np.count_nonzero(self.input_matrix) / len(self.input_matrix) * len(self.input_matrix[0])
+        return np.count_nonzero(self.input_matrix) / (len(self.input_matrix) * len(self.input_matrix[0]))
     
     # Clustering coefficient
     def calculate_clustering_coefficient(self):
         """ Calculate the clustering coefficient of the graph. """
-        self.initialize_graph()
+        self.initialize_graph() #initialize the graph G
         self.clustering_coefficient = nx.average_clustering(self.G)
         return self.clustering_coefficient
 
