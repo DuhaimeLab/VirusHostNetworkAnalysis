@@ -2,7 +2,6 @@ import numpy as np
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
-from streamlit import success
 
 class ER:
     """ Class to create a random graph using the Erdős-Rényi model. 

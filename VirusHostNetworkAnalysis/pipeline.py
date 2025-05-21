@@ -1,5 +1,3 @@
-from turtle import color
-from matplotlib import figure
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
 from VirusHostNetworkAnalysis.null_model import ER
