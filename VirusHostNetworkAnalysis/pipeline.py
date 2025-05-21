@@ -1,3 +1,5 @@
+from turtle import color
+from matplotlib import figure
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
 from VirusHostNetworkAnalysis.null_model import ER
@@ -5,6 +7,7 @@ from VirusHostNetworkAnalysis.properties import BipartiteGraph
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from statistics import mean
+import pandas as pd
 
 
 class Pipeline():
@@ -143,7 +146,7 @@ class Pipeline():
         self.prediction_properties = BipartiteGraph(self.prediction_matrix)
         # Calculate the properties
         # degree distribution
-        virus_deg, host_deg = self.properties.calculate_degree()
+        virus_deg, host_deg = self.prediction_properties.calculate_degree()
         self.virus_metrics['degree'].append(virus_deg)
         self.host_metrics['degree'].append(host_deg)
 
@@ -179,12 +182,17 @@ class Pipeline():
             self.null_model = ConfigurationModel(self.prediction_matrix)
             # Perform num_swaps swaps to create the null model
             self.null_model.bootstrap_stats(self.num_swaps)
+            #self.null_model.method2(0.5, 0.5)
+            #self.null_model.curveball_method(self.num_swaps)
+
         else:
             raise ValueError("Invalid null model type. Choose 'ER' or 'CM'.")
         # Create the properties object for the null model
         self.null_properties = BipartiteGraph(self.null_model)
-        # Centrality ?
+        # Centrality
         self.run_centrality(self.null_properties)
+        # Nestedness
+        self.nestedness.append(0)
 
     
     def run_centrality(self, properties:BipartiteGraph):
@@ -216,7 +224,6 @@ class Pipeline():
                              "degree":[]}
         self.nestedness = []
         self.modularity = []
-        self.properties = BipartiteGraph(self.prediction_matrix)
 
         # Prediction matrix
         self.pipeline_steps_prediction()
@@ -229,22 +236,26 @@ class Pipeline():
             with tqdm(total=self.num_runs, desc="Running iterations", colour="green") as pbar:
                 for i in range(self.num_runs):
                     self.pipeline_steps_null()
-                    self.prediction_matrix.virus_host_array = self.null_model.virus_host_array
                     pbar.update(1)
         
     
-
     def visualize_scores(self):
         """ Plot the scores of the predictions. """
         self.prediction_matrix.plot_scores()
 
-    def visualize_prediction_heatmap(self):
-        """ Plot the prediction matrix heatmap. """
-        self.prediction_properties.plot_heatmap()
+    def visualize_prediction_heatmap(self, prediction_color:str):
+        """ Plot the prediction matrix heatmap. Arguments are passed to the plot_heatmap function.
+        
+        Args:
+            prediction_color (str): Color for the predictions. Default is "indigo".
+            color_map (list): List of colors for the heatmap. Default is ["red", "lightpink", "white", "lightskyblue", "blue"].
+            ranges (list): List of ranges for the heatmap. Default is [0, 0.2, 0.45, 0.55, 0.8, 1].
+        """
+        self.prediction_properties.plot_heatmap(prediction_color=prediction_color)
     
-    def visualize_probability_heatmap(self):
+    def visualize_probability_heatmap(self, color_map, ranges):
         """ Plot the probability matrix heatmap. """
-        self.probability_properties.plot_heatmap()
+        self.probability_properties.plot_heatmap(color_map=color_map, ranges=ranges)
 
     def visualize_degree_distribution(self):
         """ Plot the degree distribution of the prediction matrix. """
@@ -256,17 +267,27 @@ class Pipeline():
   
     def visualize_prediction_centrality(self):
         """ Plot the centrality of the prediction matrix. """
-        self.prediction_properties.plot_eigenvector_centrality()
-        self.prediction_properties.plot_betweenness_centrality()
-        self.prediction_properties.plot_closeness_centrality()
+        # make 3 by 2 figure
+        fig, axis = plt.subplots(3, 2, figsize=(14, 16))
+        fig.suptitle("Centrality of the Prediction Matrix")
+        self.prediction_properties.plot_eigenvector_centrality(axis[0,0], axis[0,1])
+        self.prediction_properties.plot_betweenness_centrality(axis[1,0], axis[1,1])
+        self.prediction_properties.plot_closeness_centrality(axis[2,0], axis[2,1])
+
         self.prediction_properties.centrality_boxplot()
+        plt.suptitle("Centrality of the Prediction Matrix")
+
 
     def visualize_null_centrality(self):
         """ Plot the centrality of the null model. """
-        self.null_properties.plot_eigenvector_centrality()
-        self.null_properties.plot_betweenness_centrality()
-        self.null_properties.plot_closeness_centrality()
+        fig, axis = plt.subplots(3, 2, figsize=(14, 16))
+        fig.suptitle("Centrality of the Null Model")
+        self.null_properties.plot_eigenvector_centrality(axis[0,0], axis[0,1])
+        self.null_properties.plot_betweenness_centrality(axis[1,0], axis[1,1])
+        self.null_properties.plot_closeness_centrality(axis[2,0], axis[2,1])
+        
         self.null_properties.centrality_boxplot()
+        plt.suptitle("Centrality of the Null Model")
     
     def visualize_centrality_over_i(self):
         """ Plot the centrality of the prediction matrix over iterations. 
@@ -283,4 +304,25 @@ class Pipeline():
         self.prediction_properties.unipartite_graph()
         self.prediction_properties.plot_host_host_heatmap()
         self.prediction_properties.plot_virus_virus_heatmap()
+
+    def visualize_nestedness_distribution(self):
+        """ Placeholder for nestedness distribution. Need to fix time first. """
+        return 0
+
+    def export_pipeline_data(self, directory:str, file_name:str):
+        """ Save the data from the prediction and null models into tables. """
+        # Table with nestedness values
+        # Table has nested value in a column
+        # Second column first row is "Prediction" and following rows are "Null iteration 1", "Null iteration 2", etc.
+        # dataframe object
+        df = pd.DataFrame(columns=["Nestedness", "Type", "Number of Swaps"])
+
+        df["Nestedness"] = self.nestedness
+        df["Type"] = ["Prediction"] + [f"Null iteration {i}" for i in range(1, self.num_runs+1)]
+        df["Number of Swaps"] = [self.num_swaps] + [self.num_swaps for i in range(self.num_runs)]
+        print(df)
+
+        # Save the dataframe to a csv file
+        df.to_csv(f"{directory}/{file_name}_nestedness.csv", index=False)
+
 

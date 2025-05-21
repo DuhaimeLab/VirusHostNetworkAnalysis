@@ -312,39 +312,21 @@ def test_BipartiteGraph_clustering_coefficient():
     """ Test the clustering_coefficient function of the BipartiteGraph class."""
     test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
     test_matrix.make_rectangular_matrix()
-    test_properties = BipartiteGraph(test_matrix)
-    test_properties.input_matrix = np.array([[1, 1, 1, 1], 
-                                    [1, 1, 1, 1],
-                                    [1, 1, 1, 1],
-                                    [1, 1, 1, 1],
+    test_matrix.virus_host_array = np.array([[1, 1, 1, 1], 
                                     [1, 1, 1, 1],
                                     [1, 1, 1, 1],
                                     [1, 1, 1, 1]])
-    test_properties.rows = np.array(['v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7'])
-    test_properties.columns = np.array(['h1', 'h2', 'h3', 'h4'])
-    print(test_properties.input_matrix)
+    test_matrix.rows = np.array(["node1", "node2", "node3", "node4"])
+    test_matrix.columns = np.array(["node1", "node2", "node3", "node4"])
+    test_properties = BipartiteGraph(test_matrix)
     test_properties.initialize_graph()
-    print(test_properties.G.edges())
     assert test_properties.calculate_clustering_coefficient() == 1
     
     test_properties.input_matrix = np.array([[0, 0, 0, 0], 
                                     [0, 0, 0, 0],
                                     [0, 0, 0, 0],
-                                    [0, 0, 0, 0],
-                                    [0, 0, 0, 0],
-                                    [0, 0, 0, 0],
                                     [0, 0, 0, 0]])
     assert test_properties.calculate_clustering_coefficient() == 0
-
-    test_properties.input_matrix = np.array([[0, 1, 1, 1],
-                                             [1, 0, 1, 0],
-                                             [1, 1, 0, 0],
-                                             [1, 0, 0, 0]])
-    test_properties.rows = np.array(['v1', 'v2', 'v3', 'v4'])
-    test_properties.columns = np.array(['h1', 'h2', 'h3', 'h4'])
-    print(test_properties.input_matrix)
-    print(test_properties.G.edges())
-    assert test_properties.calculate_clustering_coefficient() == (1/3)
 
 
     

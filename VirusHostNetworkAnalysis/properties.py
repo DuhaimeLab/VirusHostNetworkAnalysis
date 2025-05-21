@@ -8,10 +8,7 @@ import seaborn as sns
 from typing import List, Tuple
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 import infomap
-
-# in the commments include what the arguments are
-# make the degree distribution a line
-# is there a way to return the plot? if you return it then you can add stuff on top of it
+from networkx.algorithms import approximation
 
 
 class BipartiteGraph:
@@ -35,31 +32,47 @@ class BipartiteGraph:
             self.probability = False
             self.title = "Null_Model"
     
-    def sort_rows_cols(self, axis:int):
+    def sort_rows_cols(self, axis:int, bipartite:bool = True):
         """ Find the sum of each row and move rows with the highest sum to the top of the matrix. 
         
         Args:
             axis (int): Axis to be used when sorting the matrix. 0 for rows, 1 for columns.
         
         """
-        # Calculate the sum of each row or column
-        counts = np.sum(self.input_matrix, axis=axis)
-        # Sort inidices based on the counts. Sorts the sums in descending order, so any ties will be broken by descending order of the index.
-        sorted_indices = np.argsort(counts)[::-1]
-        # Sort the matrix and row names based on the sorted indices
-        if axis == 1:
-            self.rows = self.rows[sorted_indices]
-            self.input_matrix = self.input_matrix[sorted_indices]
-        elif axis == 0:
-            self.columns = self.columns[sorted_indices]
-            self.input_matrix = self.input_matrix[:, sorted_indices]
+        if bipartite is True:
+            # Calculate the sum of each row or column
+            counts = np.sum(self.input_matrix, axis=axis)
+            # Sort inidices based on the counts. This method sorts the sums in descending order, so any ties will be broken by descending order of the index.
+            sorted_indices = np.argsort(counts)[::-1]
+            # Sort the matrix and row names based on the sorted indices
+            if axis == 1:
+                self.rows = self.rows[sorted_indices]
+                self.input_matrix = self.input_matrix[sorted_indices]
+            elif axis == 0:
+                self.columns = self.columns[sorted_indices]
+                self.input_matrix = self.input_matrix[:, sorted_indices]
+        else:
+            # Calculate the sum of each row or column
+            counts_virus = np.sum(self.unipartite_viruses, axis=axis)
+            counts_host = np.sum(self.unipartite_hosts, axis=axis)
+            # Sort inidices based on the counts. This method sorts the sums in descending order, so any ties will be broken by descending order of the index.
+            sorted_indices_virus = np.argsort(counts_virus)[::-1]
+            sorted_indices_host = np.argsort(counts_host)[::-1]
+            # Sort the matrices based on the sorted indices
+            if axis == 1:
+                self.unipartite_viruses = self.unipartite_viruses[sorted_indices_virus]
+                self.unipartite_hosts = self.unipartite_hosts[sorted_indices_host]
+            elif axis == 0:
+                self.unipartite_viruses = self.unipartite_viruses[:, sorted_indices_virus]
+                self.unipartite_hosts = self.unipartite_hosts[:, sorted_indices_host]
 
-    def sort_matrix(self):
+
+    def sort_matrix(self, bipartite:bool = True):
         """ Sort the matrix by rows and columns. """
         # Sort the rows
-        self.sort_rows_cols(1)
+        self.sort_rows_cols(1, bipartite)
         # Sort the columns
-        self.sort_rows_cols(0)
+        self.sort_rows_cols(0, bipartite)
 
 
     def fill_bottom_right(self):
@@ -76,13 +89,11 @@ class BipartiteGraph:
             virus_index = np.where(self.columns_square == virus)[0][0]
             host_index = np.where(self.rows_square == host)[0][0]
             self.virus_host_array_square[host_index][virus_index] = 1 if self.probability is False else row['InfProbabilities'or'Scores']
-        return self.virus_host_array_square
     
     def make_square_matrix(self):
-        """ Expand the matrix to make it square by adding rows for the hosts and columns for the viruses.
-        """
+        """ Expand the matrix to make it square by adding rows for the hosts and columns for the viruses. """
         # rectangular matrix should be sorted first
-        self.sort_matrix()
+        self.sort_matrix(True)
         # add number of hosts to the rows
         self.virus_host_array_square = np.concatenate((self.input_matrix, np.zeros((len(self.columns), len(self.columns)), dtype=bool if self.probability is False else float)), axis=0)
         self.rows_square = np.concatenate((self.rows, self.columns))
@@ -91,7 +102,6 @@ class BipartiteGraph:
         self.columns_square = np.concatenate((self.columns, self.rows))
         # Fill with 1s
         self.fill_bottom_right()
-        return self.virus_host_array_square
 
     def initialize_graph(self):
         """ Initialize the graph with nodes and edges. """
@@ -157,6 +167,11 @@ class BipartiteGraph:
                 # end the loop if the sum of the row is 0 or 1
                 # assuming that the matrix is sorted, this means that the rest of the row will be 0
                 break
+        
+        # Sort the unipartite matrices
+        self.sort_matrix(False)
+        
+        
 
     def unipartite_graph(self):
         # # Make a graph from the unipartite matrix for hosts only
@@ -195,7 +210,11 @@ class BipartiteGraph:
             raise ValueError("Algorithm not supported. Choose from 'eigenvector', 'betweenness', or 'closeness'.")
 
     def calculate_degree(self):
-        """ Calculate the degree of each node in the graph. """
+        """ Calculate the degree of each node in the graph. 
+        
+        Returns:
+            list: A list of two lists containing degrees, one for virus and one for host.
+        """
         
         host_degrees = []
         for col in range(len(self.input_matrix[0])):
@@ -235,7 +254,7 @@ class BipartiteGraph:
         plt.grid()
         plt.show()
 
-        sns.kdeplot(host_degree, color='b', fill=True)
+        sns.kdeplot(host_degree, color='dodgerblue', fill=True)
         plt.title('Host Degree Distribution')
         plt.xlabel('Degree')
         plt.ylabel('Frequency')
@@ -260,119 +279,113 @@ class BipartiteGraph:
         virus_dict = dict(sorted(virus_dict.items(), key=lambda item: item[1], reverse=True))
         host_dict = dict(sorted(host_dict.items(), key=lambda item: item[1], reverse=True))
 
-        # plot virus name on x axis and corresponding degree on y axis
-        plt.figure(figsize=(10, 6))
+        # put next to each other
+        fig, axis = plt.subplots(1, 2, figsize=(20, 6), gridspec_kw={'wspace': 0.3})
         # dot plot for virus
-        plt.scatter(list(virus_dict.keys()), list(virus_dict.values()), color='g')
+        axis[0].plot(list(virus_dict.keys()), list(virus_dict.values()), color='g')
         # remove x axis labels
-        plt.xticks([])
-        plt.title('Virus Degree Distribution')
-        plt.xlabel('Virus')
-        plt.ylabel('Degree')
+        axis[0].set_xticks([])
+        axis[0].set_title('Virus Degree Distribution')
+        axis[0].set_xlabel('Virus')
+        axis[0].set_ylabel('Degree')
         # Add Generalist and Specialist labels
-        plt.text(-0.5, -2, 'Generalist', fontsize=12, ha='right', va='center', color='black')
-        plt.text(len(virus_dict)-0.5, -2, 'Specialist', fontsize=12, ha='left', va='center', color='black')
-        plt.grid()
-        plt.show()
+        axis[0].text(-0.5, -2, 'Generalist', fontsize=12, ha='right', va='center', color='black')
+        axis[0].text(len(virus_dict)-0.5, -2, 'Specialist', fontsize=12, ha='left', va='center', color='black')
+        axis[0].grid()
 
         # plot host name on x axis and corresponding degree on y axis
-        plt.figure(figsize=(10, 6))
         # dot plot for host
-        plt.scatter(list(host_dict.keys()), list(host_dict.values()), color='b')
+        axis[1].plot(list(host_dict.keys()), list(host_dict.values()), color='dodgerblue', marker='o', linestyle='-')
         # turn the x axis labels to be vertical
-        plt.xticks(rotation=90)
-        plt.title('Host Degree Distribution')
-        plt.xlabel('Host')
-        plt.ylabel('Degree')
+        axis[1].set_xticks([])
+        axis[1].set_title('Host Degree Distribution')
+        axis[1].set_xlabel('Host')
+        axis[1].set_ylabel('Degree')
         # Add Generalist and Specialist labels
-        plt.text(-0.5, 10, 'Susceptible', fontsize=12, ha='right', va='center', color='black')
-        plt.text(len(host_dict)-0.5, 10, 'Resistant', fontsize=12, ha='left', va='center', color='black')
-        plt.grid()
-        plt.show()
+        axis[1].text(-0.5, 0, 'Susceptible', fontsize=12, ha='right', va='center', color='black')
+        axis[1].text(len(host_dict)-0.5, -10, 'Resistant', fontsize=12, ha='left', va='center', color='black')
+        axis[1].grid()
 
        
-    def plot_eigenvector_centrality(self):
+    def plot_eigenvector_centrality(self, ax1, ax2):
         """ Plot the eigenvector centrality of the graph. """
       
         # Virus distribution is green and host distribution is blue
         # Plot for the virus eigenvector centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.eigenvector_virus.values()), color='g', density=True)
-        plt.title('Eigenvector Centrality for Viruses')
-        plt.xlabel('Eigenvector Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.eigenvector_virus.values()), color='g', fill=True, ax=ax1)
+        ax1.ticklabel_format(style='plain')
+        ax1.set_title('Eigenvector Centrality for Viruses')
+        ax1.set_xlabel('Eigenvector Centrality')
+        ax1.set_ylabel('Frequency')
+        ax1.grid()
 
         # Plot for the host eigenvector centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.eigenvector_host.values()), color='b', density=True)
-        plt.title('Eigenvector Centrality for Hosts')
-        plt.xlabel('Eigenvector Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.eigenvector_host.values()), color='dodgerblue', fill=True, ax=ax2)
+        ax2.ticklabel_format(style='plain')
+        ax2.set_title('Eigenvector Centrality for Hosts')
+        ax2.set_xlabel('Eigenvector Centrality')
+        ax2.set_ylabel('Frequency')
+        ax2.grid()
 
-    def plot_betweenness_centrality(self):
+    def plot_betweenness_centrality(self, ax1, ax2):
         """ Plot the betweenness centrality of the graph. """
 
         # Virus distribution is green and host distribution is blue
         # Plot for the virus betweenness centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.betweenness_virus.values()), color='g', density=True)
-        plt.title('Betweenness Centrality for Viruses')
-        plt.xlabel('Betweenness Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.betweenness_virus.values()), color='g', fill=True, ax=ax1)
+        ax1.ticklabel_format(style='plain')
+        ax1.set_title('Betweenness Centrality for Viruses')
+        ax1.set_xlabel('Betweenness Centrality')
+        ax1.set_ylabel('Frequency')
+        ax1.grid()
 
         # Plot for the host betweenness centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.betweenness_host.values()), color='b', density=True)
-        plt.title('Betweenness Centrality for Hosts')
-        plt.xlabel('Betweenness Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.betweenness_host.values()), color='dodgerblue', fill=True, ax=ax2)
+        ax2.ticklabel_format(style='plain')
+        ax2.set_title('Betweenness Centrality for Hosts')
+        ax2.set_xlabel('Betweenness Centrality')
+        ax2.set_ylabel('Frequency')
+        ax2.grid()
 
-    def plot_closeness_centrality(self):
+    def plot_closeness_centrality(self, ax1, ax2):
         """ Plot the closeness centrality of the graph. """
 
         # Virus distribution is green and host distribution is blue
         # Plot for the virus closeness centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.closeness_virus.values()), color='g', density=True)
-        plt.title('Closeness Centrality for Viruses')
-        plt.xlabel('Closeness Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.closeness_virus.values()), color='g', fill=True, ax=ax1)
+        ax1.ticklabel_format(style='plain')
+        ax1.set_title('Closeness Centrality for Viruses')
+        ax1.set_xlabel('Closeness Centrality')
+        ax1.set_ylabel('Frequency')
+        ax1.grid()
 
         # Plot for the host closeness centrality
-        plt.figure(figsize=(10, 6))
-        plt.hist(list(self.closeness_host.values()), color='b', density=True)
-        plt.title('Closeness Centrality for Hosts')
-        plt.xlabel('Closeness Centrality')
-        plt.ylabel('Frequency')
-        plt.grid()
-        plt.show()
+        sns.kdeplot(list(self.closeness_host.values()), color='dodgerblue', fill=True, ax=ax2)
+        ax2.ticklabel_format(style='plain')
+        ax2.set_title('Closeness Centrality for Hosts')
+        ax2.set_xlabel('Closeness Centrality')
+        ax2.set_ylabel('Frequency')
+        ax2.grid()
 
     def centrality_boxplot(self):
         """ Plot the centrality measures for host and virus in a boxplot all together. """
-
-        centrality_data = [
-            self.eigenvector_virus.values(), self.eigenvector_host.values(),
-            self.betweenness_virus.values(), self.betweenness_host.values(),
-            self.closeness_virus.values(), self.closeness_host.values()
-        ]
-        sns.boxplot(data=[list(data) for data in centrality_data],
-                palette=["forestgreen", "dodgerblue"] * 3)
-        # make a legend where green is virus and blue is host
-        plt.legend(["Virus", "Host"], loc='upper left')
-        # group the data by the centrality measure
-        # first group is eigenvector, second is betweenness, third is closeness
-        plt.xticks([0, 2, 4], ['Eigenvector', 'Betweenness', 'Closeness'])
-        plt.title('Centrality Measures')
+        fig, axis = plt.subplots(1, 3, figsize=(15, 6))
+        sns.boxplot(data=[list(data) for data in [self.eigenvector_virus.values(), self.eigenvector_host.values()]],
+                palette=["forestgreen", "dodgerblue"], ax=axis[0])
+        sns.boxplot(data=[list(data) for data in [self.betweenness_virus.values(), self.betweenness_host.values()]],
+                palette=["forestgreen", "dodgerblue"], ax=axis[1])
+        sns.boxplot(data=[list(data) for data in [self.closeness_virus.values(), self.closeness_host.values()]],
+            palette=["forestgreen", "dodgerblue"], ax=axis[2])
+        axis[0].set_ylabel("Centrality")
+        axis[0].set_title("Eigenvector Centrality")
+        axis[1].set_title("Betweenness Centrality")
+        axis[2].set_title("Closeness Centrality")
+        axis[0].set_xticks([0, 1])
+        axis[0].set_xticklabels(["Virus", "Host"])
+        axis[1].set_xticks([0, 1])
+        axis[1].set_xticklabels(["Virus", "Host"])
+        axis[2].set_xticks([0, 1])
+        axis[2].set_xticklabels(["Virus", "Host"])
 
         
     def plot_heatmap(self, prediction_color = "indigo", color_map=["red", "lightpink", "white", "lightskyblue", "blue"], ranges=[0, 0.2, 0.45, 0.55, 0.8, 1]):
@@ -384,7 +397,7 @@ class BipartiteGraph:
         """
 
         # Sort the matrix so that patterns are visible
-        self.sort_matrix()
+        self.sort_matrix(True)
 
         # Make heatmap color red if 1, grey if 0.5, and blue if 0 using user-defined color map
         cm1 = mcol.LinearSegmentedColormap.from_list("MyCmapName",[(ranges[0], color_map[0]), (ranges[1], color_map[1]), (ranges[2], color_map[2]), (ranges[3], color_map[2]), (ranges[4], color_map[3]), (ranges[5], color_map[4])])
@@ -438,6 +451,7 @@ class BipartiteGraph:
 
     def plot_virus_virus_heatmap(self):
         """ Plot the heatmap of the unipartite virus-viruses matrix. """
+        # Sort the matrix so that patterns are visible
         # Figure size
         plt.figure(figsize=(10, 10))
         # Mask the diagonal
@@ -475,6 +489,8 @@ class BipartiteGraph:
         """Calculate nestedness for rows using the NODF algorithm for the array.
         Args:
             pair (tuple): Tuple containing the indices of the two rows to be compared.
+        Returns:
+            float: Nestedness value for the pair of rows.
         """
         # generate list of rows to compare
         pair1 = self.input_matrix[pair[0],].astype(int)
@@ -485,6 +501,8 @@ class BipartiteGraph:
         """Calculate nestedness for cols using the NODF algorithm for the array.
         Args:
             pair (tuple): Tuple containing the indices of the two columns to be compared.
+        Returns:
+            float: Nestedness value for the pair of columns.
         """
         pair1 = self.input_matrix[:, pair[0]].astype(int)
         pair2 = self.input_matrix[:, pair[1]].astype(int)
@@ -495,6 +513,8 @@ class BipartiteGraph:
 
         Args:
             axis (int): Axis to be used when determining all pairs.
+        Returns:
+            List[Tuple[int, int]]: List of tuples containing all possible i-j pairs. 
         """
         lst: List[Tuple[int, int]] = []
         for i in range(0, self.input_matrix.shape[axis]):
@@ -507,6 +527,8 @@ class BipartiteGraph:
         Args:
             x (list[int]): first list
             y (list[int]): second list
+        Returns:
+            float: Nestedness value for the pair of lists.
         """
         if sum(x) <= sum(y) or sum(y) == 0:
             return 0
@@ -521,27 +543,14 @@ class BipartiteGraph:
                     total += 1
         return counter/total * 100
     
-    # def compare2(self, x, y) -> float:
-    #     """Compare two lists containing 0 and 1.
-
-    #     Args:
-    #         x (list[int]): first list
-    #         y (list[int]): second list
-    #     """
-
-    #     if sum(x) <= sum(y) or sum(y) == 0:
-    #         return 0
-    #     else:
-    #         # the number of -1s in the subtraction contributes to the denominator
-    #         count_minus1 = np.count_nonzero(np.subtract(x, y) == -1) 
-    #         # the number of 2s in the addition contributes to the numerator and denominator
-    #         count_2 = np.count_nonzero(np.add(x, y) == 2) 
-    #     return (count_2 / (count_2 + count_minus1)) * 100
-    
     def run_nestedness(self):
-        """Run the nestedness algorithm for the array. This is not parallelized."""
+        """Run the nestedness algorithm for the array. This is not parallelized.
+        
+        Returns:
+            float: Nestedness value for the array.
+        """
         # Sort the matrix
-        self.sort_matrix()
+        self.sort_matrix(True)
 
         # Calculate nestedness for rows
         nrow = []
@@ -564,10 +573,12 @@ class BipartiteGraph:
 
         Args:
             num_procs (int): Number of cores to be used.
+        Returns:
+            float: Nestedness value for the array.
         """
 
         # The matrix should be sorted for nestedness to work. Will need to re-sort each time?
-        self.sort_matrix()
+        self.sort_matrix(True)
 
         # Calculate nestedness for rows and columns in parallel
         with Pool() as pool:
@@ -582,7 +593,11 @@ class BipartiteGraph:
 
     # Calculate modularity
     def calculate_modularity(self):
-        """ Calculate the modularity of the graph. """
+        """ Calculate the modularity of the graph. 
+        
+        Returns:
+            modularity (float): The modularity of the graph.
+        """
         self.initialize_graph()
         # Use the Infomap algorithm to calculate modularity
         im = infomap.Infomap()
@@ -602,30 +617,50 @@ class BipartiteGraph:
 
     # Connectivity
     def calculate_connectivity(self):
-        """ Calculate the connectivity of the graph. """
+        """ Calculate the connectivity of the graph. 
+        
+        Returns:
+            connectivity (float): The connectivity of the graph.
+        """
         self.initialize_graph()
         self.connectivity = nx.average_node_connectivity(self.G)
         return self.connectivity
     
     # Percent edges
     def calculate_percent_edges(self):
-        """ Calculate the percent of edges in the graph. """
+        """ Calculate the percent of edges in the graph. 
+
+        Returns:
+            float: The percent of edges in the graph.
+        """
         # count 1s in the matrix
         return np.count_nonzero(self.input_matrix) / (len(self.input_matrix) * len(self.input_matrix[0]))
     
     # Clustering coefficient
     def calculate_clustering_coefficient(self):
-        """ Calculate the clustering coefficient of the graph. """
+        """ Calculate the clustering coefficient of the graph. 
+        
+        Return:
+            clustering_coefficient (float): The clustering coefficient of the graph.
+        """
         self.initialize_graph() #initialize the graph G
-        self.clustering_coefficient = nx.average_clustering(self.G)
+        self.clustering_coefficient = approximation.average_clustering(self.G, trials=1000, seed=42)
         return self.clustering_coefficient
 
     # average number of viruses per host
     def calculate_average_viruses_per_host(self):
-        """ Calculate the average number of viruses per host. """
+        """ Calculate the average number of viruses per host. 
+        
+        Returns:
+            float: The average number of viruses per host.
+        """
         return np.count_nonzero(self.input_matrix) / len(self.input_matrix[0])
     # average number of hosts per virus
     def calculate_average_hosts_per_virus(self):
-        """ Calculate the average number of hosts per virus. """
+        """ Calculate the average number of hosts per virus. 
+        
+        Returns:
+            float: The average number of hosts per virus.
+        """
         return np.count_nonzero(self.input_matrix) / len(self.input_matrix)
     

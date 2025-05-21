@@ -2,6 +2,7 @@ import numpy as np
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
+from streamlit import success
 
 class ER:
     """ Class to create a random graph using the Erdős-Rényi model. 
@@ -19,7 +20,11 @@ class ER:
         self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype=bool)
 
     def fill_ER_graph(self):
-        """ Create a graph with n nodes and random edges between them."""
+        """ Create a graph with n nodes and random edges between them.
+        
+        Returns:
+            np.ndarray: The filled matrix with the randomly assigned virus-host interactions.
+        """
         # Iterate through all pairs of nodes in the graph
         for row in range(0, len(self.rows)):
             for col in range(0, len(self.columns)):
@@ -30,7 +35,11 @@ class ER:
         return self.virus_host_array
 
     def create_edge_list(self):
-        """ Create an edge list from the matrix. """
+        """ Create an edge list from the matrix. 
+        
+        Returns:
+            list: A list of tuples representing the edges in the graph.
+        """
         edge_list = []
         for i in range(len(self.virus_host_array)):
             for j in range(len(self.virus_host_array[0])):
@@ -67,7 +76,10 @@ class ConfigurationModel:
         self.columns = PredictionMatrix.columns
   
     def find_candidates(self):
-        """ Randomly selects two viruses and finds candidate edges to swap between them."""
+        """ Randomly selects two viruses and finds candidate edges to swap between them.
+        
+        Returns:
+            tuple: Two dictionaries containing candidate edges for the two randomly selected viruses."""
         # find number of viruses/columns
         num_viruses = len(self.virus_host_array)
 
@@ -84,16 +96,6 @@ class ConfigurationModel:
         # initialize empty dictionaries for candidate edges
         virus1_candidates = {}
         virus2_candidates = {}
-
-        # find candidate edges to swap
-        # for counter, (v1, v2) in enumerate(zip(virus_array1, virus_array2)):
-        #     if v1 == v2:
-        #         continue
-        #     else:
-        #         if v1 == 0:
-        #             virus2_candidates[counter] = self.index1
-        #         else: 
-        #             virus1_candidates[counter] = self.index2
 
         for counter, (v1, v2) in enumerate(zip(virus_array1, virus_array2)):
             if v1 != v2:
@@ -146,6 +148,96 @@ class ConfigurationModel:
         while self.successful_runs < swaps:
             self.run_config_model()
 
+    def method2(self, percent_row, percent_col):
+        """ Create a random graph using the Configuration Model. 
+        Args:
+        percent_row (float): Percentage of rows to swap.
+        percent_col (float): Percentage of columns to swap.
+        """
+        
+        shuffle_n_col = len(self.virus_host_array[0]) * percent_col
+        shuffle_n_row = len(self.virus_host_array) * percent_row
+
+        # shuffle the columns
+        for i in range(int(shuffle_n_col)):
+            # pick a random column
+            col = random.randint(0, len(self.virus_host_array[0]) - 1)
+            # pick a second random column
+            col2 = random.randint(0, len(self.virus_host_array[0]) - 1)
+            # swap the columns
+            self.virus_host_array[:, col], self.virus_host_array[:, col2] = self.virus_host_array[:, col2], self.virus_host_array[:, col]
+        # shuffle the rows
+        for i in range(int(shuffle_n_row)):
+            # pick a random row
+            row = random.randint(0, len(self.virus_host_array) - 1)
+            # pick a second random row
+            row2 = random.randint(0, len(self.virus_host_array) - 1)
+            # swap the rows
+            self.virus_host_array[row], self.virus_host_array[row2] = self.virus_host_array[row2], self.virus_host_array[row]
+
+
+    # use normal method for now, have not finished testing curveball method and takes same amount of time
+    def curveball_method(self, swaps):
+        """ Create a random bipartite matrix using the curveball method.
+        Args:
+            swaps (int): Number of successful swaps to make.
+        """
+
+        # check if virus length is longer than host length
+        if len(self.virus_host_array) <= len(self.virus_host_array[0]):
+            print("Cannot use curveball method. Virus length is not longer than host length.")
+
+        # create dicitonary where key is the host and value is the list of viruses that interact with it
+        interactions_dict = {}
+        for i in range(len(self.virus_host_array[0])):
+            for j in range(len(self.virus_host_array)):
+                if self.virus_host_array[j][i] == 1:
+                    if self.columns[i] not in interactions_dict:
+                        interactions_dict[self.columns[i]] = []
+                    interactions_dict[self.columns[i]].append(self.rows[j])
+
+        successful_swaps = 0
+        while successful_swaps < swaps:
+            #randomly pick 2 hosts
+            host1 = random.choice(list(interactions_dict.keys()))
+            host2 = random.choice(list(interactions_dict.keys()))
+
+            # make sure they are not the same
+            while host1 == host2:
+                host2 = random.choice(list(interactions_dict.keys()))
+            
+            # make a list of viruses in host 1 that are not in host 2
+            host1_unique_viruses = [virus for virus in interactions_dict[host1] if virus not in interactions_dict[host2]]
+            host2_unique_viruses = [virus for virus in interactions_dict[host2] if virus not in interactions_dict[host1]]
+
+            # make sure there are unique viruses in both hosts
+            if host1_unique_viruses and host2_unique_viruses:
+                # for the length of the shorter list, switch that many viruses between the two hosts
+                switch_num = min(len(host1_unique_viruses), len(host2_unique_viruses))
+                successful_swaps += switch_num
+                # select switch_num random viruses from each list
+                host1_viruses = random.sample(host1_unique_viruses, switch_num)
+                host2_viruses = random.sample(host2_unique_viruses, switch_num)
+                # subtract host1_viruses from host1_unique_viruses and add host2_viruses
+                interactions_dict[host1] = [virus for virus in interactions_dict[host1] if virus not in host1_viruses]
+                interactions_dict[host1] += host2_viruses
+                # subtract host2_viruses from host2_unique_viruses and add host1_viruses
+                interactions_dict[host2] = [virus for virus in interactions_dict[host2] if virus not in host2_viruses]
+                interactions_dict[host2] += host1_viruses
+
+                # update the matrix with the new interaction
+                # for host1 and host2, chnage the columns to 0
+                self.virus_host_array[:, list(self.columns).index(host1)] = 0
+                self.virus_host_array[:, list(self.columns).index(host2)] = 0
+
+                for i in range(len(self.virus_host_array)):
+                    # for each virus in host1, set the corresponding column to 1
+                    if self.rows[i] in interactions_dict[host1]:
+                        self.virus_host_array[i][list(self.columns).index(host1)] = 1
+                    # for each virus in host2, set the corresponding column to 1
+                    if self.rows[i] in interactions_dict[host2]:
+                        self.virus_host_array[i][list(self.columns).index(host2)] = 1
+
 class RandomShuffle:
     """ Class to create a random graph. 
     The graph is initialized with a given number of rows and columns.
@@ -159,7 +251,11 @@ class RandomShuffle:
         self.columns = PredictionMatrix.columns
 
     def shuffle_ones(self):
-        """ Shuffle the 1s in the matrix. """
+        """ Shuffle the 1s in the matrix. 
+        
+        Returns:
+            np.ndarray: The shuffled matrix with the randomly assigned virus-host interactions.
+        """
         # Get sum of the matrix
         sum_matrix = np.sum(self.virus_host_array)
         # Randomly select sum_matrix number of spots in the matrix

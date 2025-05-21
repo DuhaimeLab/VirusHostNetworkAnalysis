@@ -61,8 +61,7 @@ class PredictionMatrix:
         self.columns = self.virus_host['pairs'].str.split(':').str[1].unique()
 
     def initialize_matrix(self):
-        """"Create a matrix full of zeros and make a list of rows and column labels.
-        """""
+        """Create a matrix full of zeros and make a list of rows and column labels. """
         self.virus_host_array = np.zeros((len(self.rows), len(self.columns)), dtype= bool if self.probability is False else float)
     
     def fill_matrix(self):
@@ -89,7 +88,11 @@ class PredictionMatrix:
                     self.virus_host_array[virus_index][host_index] = row['Scores']
 
     def make_rectangular_matrix(self):
-        """ Call all functions to make a rectangular matrix"""
+        """ Call all functions to make a rectangular matrix
+        
+        Returns:
+            np.ndarray: The filled matrix with the virus-host interactions.
+        """
         self.get_unique_virus_host()
         self.initialize_matrix()
         self.fill_matrix()
