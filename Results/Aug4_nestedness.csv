@@ -1,7 +1,7 @@
-Nestedness,Type,Number of Swaps
-61.0361387336295,Prediction,1000
-0.0,Null iteration 1,1000
-0.0,Null iteration 2,1000
-0.0,Null iteration 3,1000
-0.0,Null iteration 4,1000
-0.0,Null iteration 5,1000
+Method,Iteration,Number of Swaps,Nestedness
+Prediction,Prediction,394190,61.0361387336295
+CM,Null iteration 1,394190,63.15421745962769
+CM,Null iteration 2,394190,63.099523178540906
+CM,Null iteration 3,394190,63.205488284950675
+CM,Null iteration 4,394190,63.17233031989673
+CM,Null iteration 5,394190,63.083163005209

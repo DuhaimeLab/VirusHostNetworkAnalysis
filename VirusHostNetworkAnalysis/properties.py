@@ -8,7 +8,6 @@ import seaborn as sns
 from typing import List, Tuple
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 import infomap
-from networkx.algorithms import approximation
 
 
 class BipartiteGraph:
@@ -191,21 +190,23 @@ class BipartiteGraph:
     def calculate_centrality(self, algorithm = "eigenvector", max_iter = 1000):
         """ Calculate the centrality of the graph. """
         self.initialize_graph()
+        # lower the algorithm name to make it case insensitive
+        algorithm = algorithm.lower()
         if algorithm == "eigenvector":
             self.eigenvector = nx.eigenvector_centrality(self.G, max_iter=max_iter)
             # Split the eigenvector centrality into virus and host
-            self.eigenvector_virus = {k: v for k, v in self.eigenvector.items() if k in self.rows}
-            self.eigenvector_host = {k: v for k, v in self.eigenvector.items() if k in self.columns}
+            self.eigenvector_virus = {k: self.eigenvector[k] for k in self.rows if k in self.eigenvector}
+            self.eigenvector_host = {k: self.eigenvector[k] for k in self.columns if k in self.eigenvector}
         elif algorithm == "betweenness":
             self.betweenness = nx.betweenness_centrality(self.G)
             # Split the betweenness centrality into virus and host
-            self.betweenness_virus = {k: v for k, v in self.betweenness.items() if k in self.rows}
-            self.betweenness_host = {k: v for k, v in self.betweenness.items() if k in self.columns}
+            self.betweenness_virus = {k: self.betweenness[k] for k in self.rows if k in self.betweenness}
+            self.betweenness_host = {k: self.betweenness[k] for k in self.columns if k in self.betweenness}
         elif algorithm == "closeness":
             self.closeness = nx.closeness_centrality(self.G)
             # Split the closeness centrality into virus and host
-            self.closeness_virus = {k: v for k, v in self.closeness.items() if k in self.rows}
-            self.closeness_host = {k: v for k, v in self.closeness.items() if k in self.columns}   
+            self.closeness_virus = {k: self.closeness[k] for k in self.rows if k in self.closeness}
+            self.closeness_host = {k: self.closeness[k] for k in self.columns if k in self.closeness}   
         else:
             raise ValueError("Algorithm not supported. Choose from 'eigenvector', 'betweenness', or 'closeness'.")
 
@@ -604,6 +605,8 @@ class BipartiteGraph:
         im.add_networkx_graph(self.G)
         im.run()
         self.modularity = im.get_modules()
+        # get average modularity
+        self.modularity = np.mean(list(self.modularity.values()))
         return self.modularity
     
     # Plot modularity
@@ -644,7 +647,7 @@ class BipartiteGraph:
             clustering_coefficient (float): The clustering coefficient of the graph.
         """
         self.initialize_graph() #initialize the graph G
-        self.clustering_coefficient = approximation.average_clustering(self.G, trials=1000, seed=42)
+        self.clustering_coefficient = nx.average_clustering(self.G)
         return self.clustering_coefficient
 
     # average number of viruses per host

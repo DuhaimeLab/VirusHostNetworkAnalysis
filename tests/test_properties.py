@@ -304,12 +304,34 @@ def test_BipartiteGraph_calculate_percent_edges():
                                     [0, 0, 0, 1]])
     assert test_properties.calculate_percent_edges() == (5/14)
 
+    # Test number 4 - All one matrix
+    test_properties.input_matrix = np.array([[1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1]])
+    assert test_properties.calculate_percent_edges() == 1
+
 def test_BipartiteGraph_modularity():
     """ Test the modularity function of the BipartiteGraph class."""
-    return
+    ### Come back to this test
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+    test_properties.input_matrix = np.array([[0, 1, 1, 1, 0, 0],
+                                             [1, 0, 1, 0, 0, 0],
+                                             [1, 1, 0, 0, 0, 0],
+                                             [1, 0, 0, 0, 1, 1],
+                                             [0, 0, 0, 1, 0, 1],
+                                             [0, 0, 0, 1, 1, 0]])
+    test_properties.rows = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
+    test_properties.columns = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
+    assert test_properties.calculate_modularity() == 0.5
 
 def test_BipartiteGraph_clustering_coefficient():
-    """ Test the clustering_coefficient function of the BipartiteGraph class."""
+    """ Test the clustering_coefficient function of the[] BipartiteGraph class."""
     test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
     test_matrix.make_rectangular_matrix()
     test_matrix.virus_host_array = np.array([[1, 1, 1, 1], 
@@ -327,9 +349,132 @@ def test_BipartiteGraph_clustering_coefficient():
                                     [0, 0, 0, 0],
                                     [0, 0, 0, 0]])
     assert test_properties.calculate_clustering_coefficient() == 0
+    test_properties.input_matrix = np.array([[0, 1, 1, 1], 
+                                             [1, 0, 1, 0],
+                                             [1, 1, 0, 0],
+                                             [1, 0, 0, 0]])
+    assert test_properties.calculate_clustering_coefficient() == (7/12)
 
 
+def test_BipartiteGraph_avg_host_per_virus():
+    """ Test the calculate_average_viruses_per_host() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test all 1s
+    test_properties.input_matrix = np.array([[1, 1, 1, 1], 
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1]])
+    assert test_properties.calculate_average_hosts_per_virus() == 4
+
+    # Test all 0s
+    test_properties.input_matrix = np.array([[0, 0, 0, 0], 
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0]])
+    assert test_properties.calculate_average_hosts_per_virus() == 0
+
+    # Nested
+    test_properties.input_matrix = np.array([[1, 1, 1, 0], 
+                                             [1, 1, 0, 0],
+                                             [1, 1, 0, 0],
+                                             [1, 0, 0, 0]])
+    assert test_properties.calculate_average_hosts_per_virus() == 2
+
+    # Modular
+    test_properties.input_matrix = np.array([[1, 1, 0, 0], 
+                                             [1, 1, 0, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 1, 0]])
+    assert test_properties.calculate_average_hosts_per_virus() == (7/5)
+    test_properties.input_matrix = np.array([[1, 1, 1, 1], 
+                                             [0, 0, 0, 0],
+                                             [0, 0, 0, 0],
+                                             [0, 0, 0, 0],
+                                             [0, 0, 0, 0]])
+    assert test_properties.calculate_average_hosts_per_virus() == (4/5)
     
 
 
+def test_BipartiteGraph_avg_virus_per_host():
+    """ Test the calculate_average_viruses_per_host() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test all 1s
+    test_properties.input_matrix = np.array([[1, 1, 1, 1], 
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1],
+                                    [1, 1, 1, 1]])
+    assert test_properties.calculate_average_viruses_per_host() == 4
+
+    # Test all 0s
+    test_properties.input_matrix = np.array([[0, 0, 0, 0], 
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0],
+                                    [0, 0, 0, 0]])
+    assert test_properties.calculate_average_viruses_per_host() == 0
+
+    # Nested
+    test_properties.input_matrix = np.array([[1, 1, 1, 0], 
+                                             [1, 1, 0, 0],
+                                             [1, 1, 0, 0],
+                                             [1, 0, 0, 0]])
+    assert test_properties.calculate_average_viruses_per_host() == 2
+
+    # Modular
+    test_properties.input_matrix = np.array([[1, 1, 0, 0], 
+                                             [1, 1, 0, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 1, 0]])
+    assert test_properties.calculate_average_viruses_per_host() == (7/4)
+    test_properties.input_matrix = np.array([[1, 0, 0, 0], 
+                                             [1, 0, 0, 0],
+                                             [1, 0, 0, 0],
+                                             [1, 0, 0, 0],
+                                             [1, 0, 0, 0]])
+    assert test_properties.calculate_average_viruses_per_host() == (5/4)
+
+
+def test_BipartiteGraph_closeness_centrality():
+    """ Test the calculate_eigenvector_centrality() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test #1
+    test_properties.input_matrix = np.array([[1, 1],
+                                            [1, 0],
+                                            [0, 1],
+                                            [0, 1]])
+    test_properties.rows = np.array(["v2", "v3", "v5", "v6"])
+    test_properties.columns = np.array(["h1", "h4"])
+    test_properties.initialize_graph()
+    test_properties.draw_graph(True)
+    test_properties.calculate_centrality("closeness")
+    assert list(test_properties.closeness_host.values()) == [0.5, 5/8]
+    assert list(test_properties.closeness_virus.values()) == [5/8, 5/14, 5/12, 5/12]
     
+def test_BipartiteGraph_betwenness_centrality():
+    """ Test the calculate_eigenvector_centrality() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test #1
+    test_properties.input_matrix = np.array([[1, 1],
+                                            [1, 0],
+                                            [0, 1],
+                                            [0, 1]])
+    test_properties.rows = np.array(["v2", "v3", "v5", "v6"])
+    test_properties.columns = np.array(["h1", "h4"])
+    test_properties.initialize_graph()
+    test_properties.draw_graph(True)
+    test_properties.calculate_centrality("betweenness")
+    assert [round(v, 1) for v in test_properties.betweenness_host.values()] == [0.4, 0.7]
+    assert [round(v, 1) for v in test_properties.betweenness_virus.values()] == [0.6, 0, 0, 0]

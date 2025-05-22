@@ -1,3 +1,4 @@
+from networkx import betweenness_centrality
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
 from VirusHostNetworkAnalysis.null_model import ER
@@ -179,19 +180,20 @@ class Pipeline():
         elif self.null_type == "CM":
             self.null_model = ConfigurationModel(self.prediction_matrix)
             # Perform num_swaps swaps to create the null model
-            self.null_model.bootstrap_stats(self.num_swaps)
-            #self.null_model.method2(0.5, 0.5)
+            # self.null_model.bootstrap_stats(self.num_swaps)
+            self.null_model.method2(0.5, 0.5)
             #self.null_model.curveball_method(self.num_swaps)
 
         else:
             raise ValueError("Invalid null model type. Choose 'ER' or 'CM'.")
+        
         # Create the properties object for the null model
         self.null_properties = BipartiteGraph(self.null_model)
         # Centrality
         self.run_centrality(self.null_properties)
         # Nestedness
-        self.nestedness.append(0)
-
+        nest = self.null_properties.run_parallel(self.num_cores)
+        self.nestedness.append(nest)
     
     def run_centrality(self, properties:BipartiteGraph):
         """ Run the centrality calculations for the given properties object. """
@@ -313,14 +315,57 @@ class Pipeline():
         # Table has nested value in a column
         # Second column first row is "Prediction" and following rows are "Null iteration 1", "Null iteration 2", etc.
         # dataframe object
-        df = pd.DataFrame(columns=["Nestedness", "Type", "Number of Swaps"])
+        df = pd.DataFrame(columns=["Method", "Iteration", "Number of Swaps", "Nestedness"])
 
+        df["Method"] = ["Prediction"] + [self.null_type for i in range(self.num_runs)]
+        df["Iteration"] = ["Prediction"] + [f"Null iteration {i}" for i in range(1, self.num_runs+1)]
+        df["Number of Swaps"] = [self.num_swaps for i in range(self.num_runs+1)]
         df["Nestedness"] = self.nestedness
-        df["Type"] = ["Prediction"] + [f"Null iteration {i}" for i in range(1, self.num_runs+1)]
-        df["Number of Swaps"] = [self.num_swaps] + [self.num_swaps for i in range(self.num_runs)]
         print(df)
 
         # Save the dataframe to a csv file
         df.to_csv(f"{directory}/{file_name}_nestedness.csv", index=False)
+
+        # Table with centrality values
+        df = pd.DataFrame(columns=["Method", "Run", "Number of Swaps", "Node", "Eigenvector Centrality", "Betweenness Centrality", "Closeness Centrality"])
+        
+        df["Method"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
+                   [self.null_type for i in range((self.num_runs) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
+        
+        df["Run"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
+                    [f"Null iteration {i}" for i in range(1, self.num_runs+1) for _ in range(len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))]
+        
+        df["Number of Swaps"] = [self.num_swaps for i in range((self.num_runs+1) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
+
+        # Add the node names to the dataframe
+        df["Node"] = (list(self.prediction_matrix.rows) + list(self.prediction_matrix.columns)) * (self.num_runs + 1)
+
+        # Add the centrality values to the dataframe
+        df["Eigenvector Centrality"] = [
+            val for i in range(self.num_runs+1) 
+            for val in (self.virus_metrics['eigenvector'][i] + self.host_metrics['eigenvector'][i])
+        ]
+
+        df["Betweenness Centrality"] = [
+            val for i in range(self.num_runs+1) 
+            for val in (self.virus_metrics['betweenness'][i] + self.host_metrics['betweenness'][i])
+        ]
+
+        df["Closeness Centrality"] = [
+            val for i in range(self.num_runs+1) 
+            for val in (self.virus_metrics['closeness'][i] + self.host_metrics['closeness'][i])
+        ]
+
+        # Save df to csv
+        df.to_csv(f"{directory}/{file_name}_centrality_measures.csv", index=False)
+
+        # Print first 10 rows of the dataframe
+        print(df.head(10))
+
+
+        
+       
+
+
 
 
