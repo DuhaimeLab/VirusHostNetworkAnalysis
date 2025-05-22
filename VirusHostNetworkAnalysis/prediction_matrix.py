@@ -27,8 +27,6 @@ class PredictionMatrix:
         """ Check if the input file is in the correct format. """
         # Check if the file has the three columns needed for visualization
         # The files need pairs, Predicitons, and either InfProbabilities OR Scores
-        # the file does not need to have all three columns, but it needs to have at least one of the last two
-        # Check if the file has the required columns
         required_columns = ['pairs', 'Predictions']
         if not all(col in self.virus_host.columns for col in required_columns):
             raise ValueError(f"The input file must contain the following columns: {', '.join(required_columns)}")
@@ -44,7 +42,6 @@ class PredictionMatrix:
         plt.figure(figsize=(10, 6))
         # column name is either InfProbabilities or Scores
         if 'InfProbabilities' in self.virus_host.columns:
-            # change color of each bar to be blue if below 0.5 and red if above
             sns.histplot(self.virus_host['InfProbabilities'], kde=False)
         else:
             sns.histplot(self.virus_host['Scores'], kde=False)

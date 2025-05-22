@@ -50,7 +50,11 @@ class ER:
         return edge_list
     
     def draw_graph(self, include_label:bool):
-        """ Draw the graph using NetworkX. """
+        """ Draw the graph using NetworkX. 
+        
+        Args:
+            include_label (bool): Whether to include labels on the nodes.
+        """
         plt.figure(figsize=(40, 30))
         # Draw the graph. Blue for nodes in rows, red for nodes in columns
         node_color = ['blue' if node in self.rows else 'red' for node in self.G.nodes()]

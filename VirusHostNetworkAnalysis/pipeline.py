@@ -1,4 +1,3 @@
-from networkx import betweenness_centrality
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
 from VirusHostNetworkAnalysis.null_model import ER
@@ -328,29 +327,23 @@ class Pipeline():
 
         # Table with centrality values
         df = pd.DataFrame(columns=["Method", "Run", "Number of Swaps", "Node", "Eigenvector Centrality", "Betweenness Centrality", "Closeness Centrality"])
-        
+        # Fill in values
         df["Method"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
                    [self.null_type for i in range((self.num_runs) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
-        
         df["Run"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
                     [f"Null iteration {i}" for i in range(1, self.num_runs+1) for _ in range(len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))]
-        
         df["Number of Swaps"] = [self.num_swaps for i in range((self.num_runs+1) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
-
         # Add the node names to the dataframe
         df["Node"] = (list(self.prediction_matrix.rows) + list(self.prediction_matrix.columns)) * (self.num_runs + 1)
-
         # Add the centrality values to the dataframe
         df["Eigenvector Centrality"] = [
             val for i in range(self.num_runs+1) 
             for val in (self.virus_metrics['eigenvector'][i] + self.host_metrics['eigenvector'][i])
         ]
-
         df["Betweenness Centrality"] = [
             val for i in range(self.num_runs+1) 
             for val in (self.virus_metrics['betweenness'][i] + self.host_metrics['betweenness'][i])
         ]
-
         df["Closeness Centrality"] = [
             val for i in range(self.num_runs+1) 
             for val in (self.virus_metrics['closeness'][i] + self.host_metrics['closeness'][i])
@@ -358,7 +351,6 @@ class Pipeline():
 
         # Save df to csv
         df.to_csv(f"{directory}/{file_name}_centrality_measures.csv", index=False)
-
         # Print first 10 rows of the dataframe
         print(df.head(10))
 
