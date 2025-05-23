@@ -211,12 +211,12 @@ class Pipeline():
     def visualize_centrality_over_i(self):
         """ Plot the centrality of the prediction matrix over iterations. 
         Creates different plots for each centrality type and host vs virus. """
-        self.null_properties.plot_centrality_time_series(self.virus_metrics['eigenvector'], "Eigenvector Centrality")
-        self.null_properties.plot_centrality_time_series(self.host_metrics['eigenvector'], "Eigenvector Centrality")
-        self.null_properties.plot_centrality_time_series(self.virus_metrics['betweenness'], "Betweenness Centrality")
-        self.null_properties.plot_centrality_time_series(self.host_metrics['betweenness'], "Betweenness Centrality")
-        self.null_properties.plot_centrality_time_series(self.virus_metrics['closeness'], "Closeness Centrality")
-        self.null_properties.plot_centrality_time_series(self.host_metrics['closeness'], "Closeness Centrality")
+        self.null_properties.plot_centrality_time_series(self.virus_metrics['eigenvector'], "Eigenvector Centrality for Virus")
+        self.null_properties.plot_centrality_time_series(self.host_metrics['eigenvector'], "Eigenvector Centrality for Host")
+        self.null_properties.plot_centrality_time_series(self.virus_metrics['betweenness'], "Betweenness Centrality for Virus")
+        self.null_properties.plot_centrality_time_series(self.host_metrics['betweenness'], "Betweenness Centrality for Host")
+        self.null_properties.plot_centrality_time_series(self.virus_metrics['closeness'], "Closeness Centrality for Virus")
+        self.null_properties.plot_centrality_time_series(self.host_metrics['closeness'], "Closeness Centrality for Host")
 
     def visualize_unipartite_projection(self):
         """ Plot the unipartite projection of the prediction matrix. """

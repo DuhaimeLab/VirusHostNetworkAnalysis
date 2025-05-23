@@ -452,14 +452,18 @@ class BipartiteGraph:
                                                   virus_metrics["eigenvector"][-1]]], color="forestgreen", ax=axis[0])
         axis[0].set_title("Eigenvector Centrality")
         # set labels 
+        axis[0].set_xticks([0, 1])
+        axis[0].set_xticklabels(["Predicted", "Null"])
         sns.boxplot(data=[list(data) for data in [virus_metrics["betweenness"][0],
                                                   virus_metrics["betweenness"][-1]]], color="forestgreen", ax=axis[1])
         axis[1].set_title("Betweenness Centrality")
-        #axis[1].set_xticklabels(["Predicted", "Null"])
+        axis[1].set_xticks([0, 1])
+        axis[1].set_xticklabels(["Predicted", "Null"])
         sns.boxplot(data=[list(data) for data in [virus_metrics["closeness"][0],
                                                   virus_metrics["closeness"][-1]]], color="forestgreen", ax=axis[2])
         axis[2].set_title("Closeness Centrality")
-        #axis[2].set_xticklabels(["Predicted", "Null"])
+        axis[2].set_xticks([0, 1])
+        axis[2].set_xticklabels(["Predicted", "Null"])
 
         # boxplot for the hosts
         # 3 images in one figure, one for each centrality measure
@@ -469,15 +473,18 @@ class BipartiteGraph:
         sns.boxplot(data=[list(data) for data in [host_metrics["eigenvector"][0],
                                                   host_metrics["eigenvector"][-1]]], color="dodgerblue", ax=axis[0])  
         axis[0].set_title("Eigenvector Centrality")
-        #axis[0].set_xticklabels(["Predicted", "Null"])
+        axis[0].set_xticks([0, 1])
+        axis[0].set_xticklabels(["Predicted", "Null"])
         sns.boxplot(data=[list(data) for data in [host_metrics["betweenness"][0],
                                                   host_metrics["betweenness"][-1]]], color="dodgerblue", ax=axis[1])
         axis[1].set_title("Betweenness Centrality")
-        #axis[1].set_xticklabels(["Predicted", "Null"])
+        axis[1].set_xticks([0, 1])
+        axis[1].set_xticklabels(["Predicted", "Null"])
         sns.boxplot(data=[list(data) for data in [host_metrics["closeness"][0],
                                                   host_metrics["closeness"][-1]]], color="dodgerblue", ax=axis[2])
         axis[2].set_title("Closeness Centrality")
-        #axis[2].set_xticklabels(["Predicted", "Null"])
+        axis[2].set_xticks([0, 1])
+        axis[2].set_xticklabels(["Predicted", "Null"])
 
 
     def plot_heatmap(self, prediction_color = "indigo", color_map=["red", "lightpink", "white", "lightskyblue", "blue"], ranges=[0, 0.2, 0.45, 0.55, 0.8, 1]):
