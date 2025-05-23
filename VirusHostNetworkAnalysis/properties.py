@@ -8,6 +8,7 @@ import seaborn as sns
 from typing import List, Tuple
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 import infomap
+import itertools
 
 
 class BipartiteGraph:
@@ -45,6 +46,9 @@ class BipartiteGraph:
             sorted_indices = np.argsort(counts)[::-1]
             # Sort the matrix and row names based on the sorted indices
             if axis == 1:
+                print(self.rows, len(self.rows))
+                print(sorted_indices, len(sorted_indices))
+
                 self.rows = self.rows[sorted_indices]
                 self.input_matrix = self.input_matrix[sorted_indices]
             elif axis == 0:
@@ -186,6 +190,15 @@ class BipartiteGraph:
         # add an alpha to the edges so that they are not too dark
         nx.draw(self.G_host, pos_host, with_labels=False, node_color='blue', node_size=400, width=[4*np.power(self.G_host[u][v]['weight'], 2) for u, v in self.G_host.edges()], alpha =0.6)
                 
+    def chunks(self, l, n):
+            """Divide a list of nodes `l` in `n` chunks"""
+            l_c = iter(l)
+            while 1:
+                x = tuple(itertools.islice(l_c, n))
+                if not x:
+                    return
+                yield x
+
     # Calculate the centrality of the graph
     def calculate_centrality(self, algorithm = "eigenvector", max_iter = 1000):
         """ Calculate the centrality of the graph. """
@@ -198,10 +211,41 @@ class BipartiteGraph:
             self.eigenvector_virus = {k: self.eigenvector[k] for k in self.rows if k in self.eigenvector}
             self.eigenvector_host = {k: self.eigenvector[k] for k in self.columns if k in self.eigenvector}
         elif algorithm == "betweenness":
-            self.betweenness = nx.betweenness_centrality(self.G)
-            # Split the betweenness centrality into virus and host
-            self.betweenness_virus = {k: self.betweenness[k] for k in self.rows if k in self.betweenness}
-            self.betweenness_host = {k: self.betweenness[k] for k in self.columns if k in self.betweenness}
+            # self.betweenness = nx.betweenness_centrality(self.G)
+            # # Split the betweenness centrality into virus and host
+            # self.betweenness_virus = {k: self.betweenness[k] for k in self.rows if k in self.betweenness}
+            # self.betweenness_host = {k: self.betweenness[k] for k in self.columns if k in self.betweenness}
+    
+            """Parallel betweenness centrality  function"""
+            p = Pool(processes=None)
+            from multiprocessing import cpu_count
+            node_divisor = cpu_count() * 4
+            node_chunks = list(self.chunks(self.G.nodes(), self.G.order() // node_divisor))
+            num_chunks = len(node_chunks)
+            bt_sc = p.starmap(
+                nx.betweenness_centrality_subset,
+                zip(
+                    [self.G] * num_chunks,
+                    node_chunks,
+                    [list(self.G)] * num_chunks,
+                    [True] * num_chunks,
+                    [None] * num_chunks,
+                ),
+            )
+
+            # Reduce the partial solutions
+            from collections import defaultdict
+            bt_c = defaultdict(float, bt_sc[0])
+            for bt in bt_sc[1:]:
+                for n in bt:
+                    bt_c[n] += bt[n]
+            
+            # split the betweenness centrality into virus and host
+            self.betweenness_virus = {k: bt_c[k] for k in self.rows if k in bt_c}
+            self.betweenness_host = {k: bt_c[k] for k in self.columns if k in bt_c}
+            
+
+            
         elif algorithm == "closeness":
             self.closeness = nx.closeness_centrality(self.G)
             # Split the closeness centrality into virus and host
@@ -388,7 +432,45 @@ class BipartiteGraph:
         axis[2].set_xticks([0, 1])
         axis[2].set_xticklabels(["Virus", "Host"])
 
-        
+    def plot_prediction_vs_null(self, virus_metrics, host_metrics):
+        """ Plot the centrality measurements for the predictions and the null model. """
+        # boxplot for the viruses
+        # 3 images in one figure, one for each centrality measure
+        fig, axis = plt.subplots(1, 3, figsize=(15, 6))
+        # Set title to be "Centrality Measures for Viruses"
+        fig.suptitle("Centrality Measures for Viruses", fontsize=16)
+        sns.boxplot(data=[list(data) for data in [virus_metrics["eigenvector"][0],
+                                                  virus_metrics["eigenvector"][-1]]], color="forestgreen", ax=axis[0])
+        axis[0].set_title("Eigenvector Centrality")
+        # set labels 
+        sns.boxplot(data=[list(data) for data in [virus_metrics["betweenness"][0],
+                                                  virus_metrics["betweenness"][-1]]], color="forestgreen", ax=axis[1])
+        axis[1].set_title("Betweenness Centrality")
+        #axis[1].set_xticklabels(["Predicted", "Null"])
+        sns.boxplot(data=[list(data) for data in [virus_metrics["closeness"][0],
+                                                  virus_metrics["closeness"][-1]]], color="forestgreen", ax=axis[2])
+        axis[2].set_title("Closeness Centrality")
+        #axis[2].set_xticklabels(["Predicted", "Null"])
+
+        # boxplot for the hosts
+        # 3 images in one figure, one for each centrality measure
+        fig, axis = plt.subplots(1, 3, figsize=(15, 6))
+        # Set title to be "Centrality Measures for Hosts"
+        fig.suptitle("Centrality Measures for Hosts", fontsize=16)
+        sns.boxplot(data=[list(data) for data in [host_metrics["eigenvector"][0],
+                                                  host_metrics["eigenvector"][-1]]], color="dodgerblue", ax=axis[0])  
+        axis[0].set_title("Eigenvector Centrality")
+        #axis[0].set_xticklabels(["Predicted", "Null"])
+        sns.boxplot(data=[list(data) for data in [host_metrics["betweenness"][0],
+                                                  host_metrics["betweenness"][-1]]], color="dodgerblue", ax=axis[1])
+        axis[1].set_title("Betweenness Centrality")
+        #axis[1].set_xticklabels(["Predicted", "Null"])
+        sns.boxplot(data=[list(data) for data in [host_metrics["closeness"][0],
+                                                  host_metrics["closeness"][-1]]], color="dodgerblue", ax=axis[2])
+        axis[2].set_title("Closeness Centrality")
+        #axis[2].set_xticklabels(["Predicted", "Null"])
+
+
     def plot_heatmap(self, prediction_color = "indigo", color_map=["red", "lightpink", "white", "lightskyblue", "blue"], ranges=[0, 0.2, 0.45, 0.55, 0.8, 1]):
         """ Plot the heatmap of the matrix. Let the user choose the colors and ranges of the heatmap.
         Args:
@@ -578,7 +660,7 @@ class BipartiteGraph:
             float: Nestedness value for the array.
         """
 
-        # The matrix should be sorted for nestedness to work. Will need to re-sort each time?
+        # The matrix should be sorted for nestedness to work. Will need to re-sort each time
         self.sort_matrix(True)
 
         # Calculate nestedness for rows and columns in parallel
@@ -586,7 +668,7 @@ class BipartiteGraph:
             nrow = pool.map(self.nestedness_rows, self.pairs(axis=0))
             ncol = pool.map(self.nestedness_cols, self.pairs(axis=1))
 
-            # Compute the averages
+        # Compute the averages
         nrow_avg = sum(nrow) / (len(self.input_matrix) * (len(self.input_matrix) - 1) / 2)
         ncol_avg = sum(ncol) / (len(self.input_matrix[0]) * (len(self.input_matrix[0]) - 1) / 2)
         return (nrow_avg + ncol_avg) / 2

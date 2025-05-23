@@ -6,6 +6,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 from statistics import mean
 import pandas as pd
+import os
 
 
 class Pipeline():
@@ -22,15 +23,17 @@ class Pipeline():
     max_iter (int): Maximum number of iterations for the null model. Default is 1000.
     
     """
-    def __init__(self, file_path:str, null_type, p:float, num_swaps:int, num_runs:int, num_cores:int, 
-                 probability:bool= False, max_iter:int=1000):
+    def __init__(self, file_path:str, null_type, p:float, cm_method, percent_shuffle_virus:float,
+                 percent_shuffle_host:float, num_runs:int, num_cores:int, probability:bool= False, max_iter:int=1000):
         """ Initialize the pipeline with the given parameters. """
         self.file_path = file_path
         self.p = p
-        self.num_swaps = num_swaps
         self.num_runs = num_runs
         self.null_type = null_type
         self.num_cores = num_cores
+        self.cm_method = cm_method
+        self.percent_shuffle_v = percent_shuffle_virus
+        self.percent_shuffle_h = percent_shuffle_host
 
         self.prediction_matrix = PredictionMatrix(self.file_path, False)
         self.prediction_matrix.make_rectangular_matrix()
@@ -39,6 +42,8 @@ class Pipeline():
             self.probability_matrix.make_rectangular_matrix()
             self.probability_properties = BipartiteGraph(self.probability_matrix)
 
+        # Use 10 times the number of edges in the prediction matrix as the number of swaps
+        self.num_swaps = self.prediction_matrix.virus_host_array.sum() * 10
 
     def find_num_swaps(self):
         """ Find the number of swaps to use for the null model.
@@ -56,7 +61,7 @@ class Pipeline():
         cm = ConfigurationModel(self.prediction_matrix)
         for i in range(0, self.num_runs):
             # Perform num_swaps swaps to create the null model
-            cm.bootstrap_stats(self.num_swaps)
+            cm.bootstrap_swaps(self.num_swaps)
             # Create the properties object for the null model
             cm_properties = BipartiteGraph(cm)
             # Calculate the properties
@@ -131,13 +136,6 @@ class Pipeline():
         # plt.title("Closeness Virus Distribution")
         # plt.axvline(x=closeness_virus[0], color='r', linestyle='--')
 
-
-        # connectedness
-
-        # modularity
-
-        return
-
     def pipeline_steps_prediction(self):
         """ Run the pipeline for the VirusHostNetworkAnalysis. """
         # PREDICTION MATRIX
@@ -176,15 +174,17 @@ class Pipeline():
             self.null_model = ER(self.prediction_matrix, self.p)
             # Fill the null model
             self.null_model.fill_ER_graph()
-        elif self.null_type == "CM":
+        else: #if not ER then will be CM
             self.null_model = ConfigurationModel(self.prediction_matrix)
-            # Perform num_swaps swaps to create the null model
-            # self.null_model.bootstrap_stats(self.num_swaps)
-            self.null_model.method2(0.5, 0.5)
-            #self.null_model.curveball_method(self.num_swaps)
-
-        else:
-            raise ValueError("Invalid null model type. Choose 'ER' or 'CM'.")
+            # Map methods to their corresponding functions
+            cm_methods = {
+                "swap": lambda: self.null_model.bootstrap_swaps(self.num_swaps),
+                "shuffle": lambda: self.null_model.suffle_cm(self.percent_shuffle_v, self.percent_shuffle_h),
+                "curveball": lambda: self.null_model.curveball_method(self.num_swaps)
+            }
+            # Execute the selected method
+            cm_methods.get(self.cm_method, lambda: None)()
+            
         
         # Create the properties object for the null model
         self.null_properties = BipartiteGraph(self.null_model)
@@ -231,7 +231,7 @@ class Pipeline():
         self.prediction_properties.unipartite_matrix()
 
         # If CM is specified, run the configuration model with the given number of swaps
-        if self.null_type == "CM":
+        if self.null_type == "CM" or self.null_type == "ER":
             with tqdm(total=self.num_runs, desc="Running iterations", colour="green") as pbar:
                 for i in range(self.num_runs):
                     self.pipeline_steps_null()
@@ -247,18 +247,25 @@ class Pipeline():
         
         Args:
             prediction_color (str): Color for the predictions. Default is "indigo".
-            color_map (list): List of colors for the heatmap. Default is ["red", "lightpink", "white", "lightskyblue", "blue"].
-            ranges (list): List of ranges for the heatmap. Default is [0, 0.2, 0.45, 0.55, 0.8, 1].
         """
         self.prediction_properties.plot_heatmap(prediction_color=prediction_color)
     
     def visualize_probability_heatmap(self, color_map, ranges):
-        """ Plot the probability matrix heatmap. """
+        """ Plot the probability matrix heatmap.
+        
+        Args:
+            color_map (str): Color map for the heatmap.
+            ranges (list): List of ranges for the color map.
+        """
         self.probability_properties.plot_heatmap(color_map=color_map, ranges=ranges)
 
     def visualize_degree_distribution(self):
         """ Plot the degree distribution of the prediction matrix. """
         self.prediction_properties.plot_degree_distribution()
+
+    def visualize_degree_distribution_null(self):
+        """ Plot the degree distribution of the prediction matrix. """
+        self.null_properties.plot_degree_distribution()
 
     def visualize_degree_by_species(self):
         """ Plot the degree by species of the prediction matrix. """
@@ -287,6 +294,10 @@ class Pipeline():
         
         self.null_properties.centrality_boxplot()
         plt.suptitle("Centrality of the Null Model")
+
+    def visualize_prediction_vs_null_centrality(self):
+        """ Plot the centrality of the prediction matrix vs the null model. """
+        self.prediction_properties.plot_prediction_vs_null(self.virus_metrics, self.host_metrics)
     
     def visualize_centrality_over_i(self):
         """ Plot the centrality of the prediction matrix over iterations. 
@@ -306,54 +317,87 @@ class Pipeline():
 
     def visualize_nestedness_distribution(self):
         """ Placeholder for nestedness distribution. Need to fix time first. """
-        return 0
+        # plot as a distribution
+        plt.figure()
+        plt.hist(self.nestedness, color='skyblue')
+        plt.xlabel("NODF")
+        plt.ylabel("Frequency")
+        plt.title("NODF Distribution")
+        # add a vertical line at the nodf for the prediction matrix
+        plt.axvline(x=self.nestedness[0], color='r', linestyle='--', label='Prediction Matrix NODF')
 
-    def export_pipeline_data(self, directory:str, file_name:str):
-        """ Save the data from the prediction and null models into tables. """
-        # Table with nestedness values
-        # Table has nested value in a column
-        # Second column first row is "Prediction" and following rows are "Null iteration 1", "Null iteration 2", etc.
-        # dataframe object
-        df = pd.DataFrame(columns=["Method", "Iteration", "Number of Swaps", "Nestedness"])
-
+    def export_nestedness(self, directory:str, file_name:str):
+        """ Save the nestedness values for each run into a table. 
+        
+        Args:
+            directory (str): Directory to save the file.
+            file_name (str): Name of the file to save.
+        """
+        # Table with nestedness values for each run
+        df = pd.DataFrame(columns=["Method", "Iteration", "Percent Shuffle" if self.cm_method == "shuffle" else "Number of Swaps", "Nestedness"])
         df["Method"] = ["Prediction"] + [self.null_type for i in range(self.num_runs)]
         df["Iteration"] = ["Prediction"] + [f"Null iteration {i}" for i in range(1, self.num_runs+1)]
-        df["Number of Swaps"] = [self.num_swaps for i in range(self.num_runs+1)]
+        if self.cm_method == "shuffle":
+            df["Percent Shuffle"] = [self.percent_shuffle_v for i in range(self.num_runs+1)]
+        else:
+            df["Number of Swaps"] = [self.num_swaps for i in range(self.num_runs+1)]
         df["Nestedness"] = self.nestedness
         print(df)
 
-        # Save the dataframe to a csv file
-        df.to_csv(f"{directory}/{file_name}_nestedness.csv", index=False)
+        # Save the dataframe to a csv file in a new folder titled "file_name" in the directory
+        df.to_csv(f"{directory}/{file_name}/nestedness.csv", index=False)
+    
+    def export_centrality(self, directory:str, file_name:str):
+        """ Save the centrality values for each run into a table.
 
-        # Table with centrality values
-        df = pd.DataFrame(columns=["Method", "Run", "Number of Swaps", "Node", "Eigenvector Centrality", "Betweenness Centrality", "Closeness Centrality"])
-        # Fill in values
-        df["Method"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
-                   [self.null_type for i in range((self.num_runs) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
-        df["Run"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) + \
-                    [f"Null iteration {i}" for i in range(1, self.num_runs+1) for _ in range(len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))]
-        df["Number of Swaps"] = [self.num_swaps for i in range((self.num_runs+1) * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)))]
-        # Add the node names to the dataframe
-        df["Node"] = (list(self.prediction_matrix.rows) + list(self.prediction_matrix.columns)) * (self.num_runs + 1)
-        # Add the centrality values to the dataframe
-        df["Eigenvector Centrality"] = [
-            val for i in range(self.num_runs+1) 
-            for val in (self.virus_metrics['eigenvector'][i] + self.host_metrics['eigenvector'][i])
-        ]
-        df["Betweenness Centrality"] = [
-            val for i in range(self.num_runs+1) 
-            for val in (self.virus_metrics['betweenness'][i] + self.host_metrics['betweenness'][i])
-        ]
-        df["Closeness Centrality"] = [
-            val for i in range(self.num_runs+1) 
-            for val in (self.virus_metrics['closeness'][i] + self.host_metrics['closeness'][i])
-        ]
+        Args:
+            directory (str): Directory to save the file.
+            file_name (str): Name of the file to save.
+        """
+        # Table with centrality values. Each run is it's own file and all files are saved in the same directory.
+        for i in range(0, self.num_runs+1):
+            # Table with centrality values
+            df = pd.DataFrame(columns=["Method", "Percent Shuffle" if self.cm_method == "shuffle" else "Number of Swaps", "Node", "Eigenvector Centrality", "Betweenness Centrality", "Closeness Centrality"])
+            # Fill in values
+            df["Methods"] = ["Prediction"] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns)) if i == 0 else [self.null_type] * (len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))
+            if self.cm_method == "shuffle":
+                df["Percent Shuffle"] = [self.percent_shuffle_v for i in range(len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))]
+            else:
+                df["Number of Swaps"] = [self.num_swaps for i in range(len(self.prediction_matrix.rows) + len(self.prediction_matrix.columns))]
+            # Add the node names to the dataframe
+            df["Node"] = (list(self.prediction_matrix.rows) + list(self.prediction_matrix.columns))
+            # Add the centrality values to the dataframe
+            df["Eigenvector Centrality"] = [val for val in (self.virus_metrics['eigenvector'][i] + self.host_metrics['eigenvector'][i])]
+            df["Betweenness Centrality"] = [val for val in (self.virus_metrics['betweenness'][i] + self.host_metrics['betweenness'][i])]
+            df["Closeness Centrality"] = [val for val in (self.virus_metrics['closeness'][i] + self.host_metrics['closeness'][i])]
+            # Save df to csv
+            df.to_csv(f"{directory}/{file_name}/centrality_measures_prediction.csv", index=False)
 
-        # Save df to csv
-        df.to_csv(f"{directory}/{file_name}_centrality_measures.csv", index=False)
-        # Print first 10 rows of the dataframe
-        print(df.head(10))
+    def export_pipeline_data(self, directory:str, file_name:str):
+        """ Save the data from the prediction and null models into tables.
 
+        Args:
+            directory (str): Directory to save the file.
+            file_name (str): Name of the file to save.
+        """
+        # Create a directory to save the data
+        os.makedirs(f"{directory}/{file_name}")
+
+        # Save the nestedness for each run
+        self.export_nestedness(directory, file_name)
+
+        # Save the centrality measures for each node and each run
+        self.export_centrality(directory, file_name)
+
+        # Make a readme file inside the directory that contains the number of runs, the number of swaps or percent shuffle, the null model type
+        with open(f"{directory}/{file_name}/README.txt", "w") as f:
+            f.write(f"Number of runs: {self.num_runs}\n")
+            f.write(f"Number of swaps: {self.num_swaps}\n")
+            f.write(f"Null model type: {self.null_type}\n")
+            f.write(f"Percent shuffle: {self.percent_shuffle_v}\n")
+            f.write(f"Method: {self.cm_method}\n")
+            
+            
 
         
        

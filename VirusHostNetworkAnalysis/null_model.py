@@ -139,7 +139,7 @@ class ConfigurationModel:
             # If candidates are found, update the matrix
             self.update_matrix(candidates[0], candidates[1])
 
-    def bootstrap_stats(self, swaps):
+    def bootstrap_swaps(self, swaps):
         """ Run the Configuration Model for a number of iterations to generate a random matrix. 
         Args:
         swaps (int): Number of successful swaps to make.
@@ -151,32 +151,36 @@ class ConfigurationModel:
         while self.successful_runs < swaps:
             self.run_config_model()
 
-    def method2(self, percent_row, percent_col):
+    def shuffle_cm(self, percent_row, percent_col):
         """ Create a random graph using the Configuration Model. 
         Args:
         percent_row (float): Percentage of rows to swap.
         percent_col (float): Percentage of columns to swap.
         """
+        # if percent_row or percent_col is not between 0 and 1, raise error
+        if percent_row < 0 or percent_row > 1 or percent_col < 0 or percent_col > 1:
+            raise ValueError("The percentage of shuffles for rows and columns must both be between 0 and 1.")
         
-        shuffle_n_col = len(self.virus_host_array[0]) * percent_col
-        shuffle_n_row = len(self.virus_host_array) * percent_row
-
         # shuffle the columns
-        for i in range(int(shuffle_n_col)):
+        for i in range(int(len(self.virus_host_array[0]) * percent_col)):
             # pick a random column
             col = random.randint(0, len(self.virus_host_array[0]) - 1)
             # pick a second random column
             col2 = random.randint(0, len(self.virus_host_array[0]) - 1)
+            while col == col2:
+                col2 = random.randint(0, len(self.virus_host_array[0]) - 1)
             # swap the columns
-            self.virus_host_array[:, col], self.virus_host_array[:, col2] = self.virus_host_array[:, col2], self.virus_host_array[:, col]
+            self.virus_host_array[:, [col, col2]] = self.virus_host_array[:, [col2, col]]
         # shuffle the rows
-        for i in range(int(shuffle_n_row)):
-            # pick a random row
+        for i in range(int(len(self.virus_host_array) * percent_row)):
+            # pick a random row index
             row = random.randint(0, len(self.virus_host_array) - 1)
             # pick a second random row
             row2 = random.randint(0, len(self.virus_host_array) - 1)
+            while row == row2:
+                row2 = random.randint(0, len(self.virus_host_array) - 1)
             # swap the rows
-            self.virus_host_array[row], self.virus_host_array[row2] = self.virus_host_array[row2], self.virus_host_array[row]
+            self.virus_host_array[[row, row2]] = self.virus_host_array[[row2, row]]
 
 
     # use normal method for now, have not finished testing curveball method and takes same amount of time
@@ -198,7 +202,7 @@ class ConfigurationModel:
                     if self.columns[i] not in interactions_dict:
                         interactions_dict[self.columns[i]] = []
                     interactions_dict[self.columns[i]].append(self.rows[j])
-
+    
         successful_swaps = 0
         while successful_swaps < swaps:
             #randomly pick 2 hosts

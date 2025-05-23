@@ -1,8 +1,6 @@
 # change directory to one level up
 import os
 import sys
-
-import test
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.properties import BipartiteGraph
@@ -478,3 +476,22 @@ def test_BipartiteGraph_betwenness_centrality():
     test_properties.calculate_centrality("betweenness")
     assert [round(v, 1) for v in test_properties.betweenness_host.values()] == [0.4, 0.7]
     assert [round(v, 1) for v in test_properties.betweenness_virus.values()] == [0.6, 0, 0, 0]
+
+def test_BipartiteGraph_eigenvector_centrality():
+    """ Test the calculate_eigenvector_centrality() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test #1
+    test_properties.input_matrix = np.array([[1, 1],
+                                            [1, 0],
+                                            [0, 1],
+                                            [0, 1]])
+    test_properties.rows = np.array(["v2", "v3", "v5", "v6"])
+    test_properties.columns = np.array(["h1", "h4"])
+    test_properties.initialize_graph()
+    test_properties.draw_graph(True)
+    test_properties.calculate_centrality("eigenvector")
+    assert list(test_properties.eigenvector_host.values()) == [0.37175243743550507, 0.6014982337968756]
+    assert list(test_properties.eigenvector_virus.values()) == [0.5116687042046243, 0.19544325298260648, 0.3162254512220179, 0.3162254512220179]
