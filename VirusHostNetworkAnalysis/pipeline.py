@@ -251,7 +251,6 @@ class Pipeline():
         else:
             df["Number of Swaps"] = [self.num_swaps for i in range(self.num_runs+1)]
         df["Nestedness"] = self.nestedness
-        print(df)
 
         # Save the dataframe to a csv file in a new folder titled "file_name" in the directory
         df.to_csv(f"{directory}/{file_name}/nestedness.csv", index=False)

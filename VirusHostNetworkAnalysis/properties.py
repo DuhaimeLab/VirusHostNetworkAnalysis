@@ -46,9 +46,6 @@ class BipartiteGraph:
             sorted_indices = np.argsort(counts)[::-1]
             # Sort the matrix and row names based on the sorted indices
             if axis == 1:
-                print(self.rows, len(self.rows))
-                print(sorted_indices, len(sorted_indices))
-
                 self.rows = self.rows[sorted_indices]
                 self.input_matrix = self.input_matrix[sorted_indices]
             elif axis == 0:
@@ -220,12 +217,8 @@ class BipartiteGraph:
             p = Pool(processes=None)
             from multiprocessing import cpu_count
             node_divisor = cpu_count() * 4
-            print(f"Number of processes: {node_divisor}")
             node_chunks = list(self.chunks(self.G.nodes(), 1 if (self.G.order() // node_divisor)==0 else self.G.order() // node_divisor))
-            print(node_chunks)
             num_chunks = len(node_chunks)
-            print(f"Number of chunks: {num_chunks}")
-            print(self.G)
             bt_sc = p.starmap(
                 nx.betweenness_centrality_subset,
                 zip(
