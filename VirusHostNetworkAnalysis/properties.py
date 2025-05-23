@@ -191,13 +191,13 @@ class BipartiteGraph:
         nx.draw(self.G_host, pos_host, with_labels=False, node_color='blue', node_size=400, width=[4*np.power(self.G_host[u][v]['weight'], 2) for u, v in self.G_host.edges()], alpha =0.6)
                 
     def chunks(self, l, n):
-            """Divide a list of nodes `l` in `n` chunks"""
-            l_c = iter(l)
-            while 1:
-                x = tuple(itertools.islice(l_c, n))
-                if not x:
-                    return
-                yield x
+        """Divide a list of nodes `l` in `n` chunks"""
+        l_c = iter(l)
+        while 1:
+            x = tuple(itertools.islice(l_c, n))
+            if not x:
+                return
+            yield x
 
     # Calculate the centrality of the graph
     def calculate_centrality(self, algorithm = "eigenvector", max_iter = 1000):
@@ -216,12 +216,16 @@ class BipartiteGraph:
             # self.betweenness_virus = {k: self.betweenness[k] for k in self.rows if k in self.betweenness}
             # self.betweenness_host = {k: self.betweenness[k] for k in self.columns if k in self.betweenness}
     
-            """Parallel betweenness centrality  function"""
+            """Parallel betweenness centrality function"""
             p = Pool(processes=None)
             from multiprocessing import cpu_count
             node_divisor = cpu_count() * 4
-            node_chunks = list(self.chunks(self.G.nodes(), self.G.order() // node_divisor))
+            print(f"Number of processes: {node_divisor}")
+            node_chunks = list(self.chunks(self.G.nodes(), 1 if (self.G.order() // node_divisor)==0 else self.G.order() // node_divisor))
+            print(node_chunks)
             num_chunks = len(node_chunks)
+            print(f"Number of chunks: {num_chunks}")
+            print(self.G)
             bt_sc = p.starmap(
                 nx.betweenness_centrality_subset,
                 zip(
@@ -433,7 +437,12 @@ class BipartiteGraph:
         axis[2].set_xticklabels(["Virus", "Host"])
 
     def plot_prediction_vs_null(self, virus_metrics, host_metrics):
-        """ Plot the centrality measurements for the predictions and the null model. """
+        """ Plot the centrality measurements for the predictions and the null model. 
+        
+        Args:
+            virus_metrics (dict): Dictionary of centrality measures for viruses. Includes eigenvector, betweenness, and closeness.
+            host_metrics (dict): Dictionary of centrality measures for hosts. Includes eigenvector, betweenness, and closeness.
+        """
         # boxplot for the viruses
         # 3 images in one figure, one for each centrality measure
         fig, axis = plt.subplots(1, 3, figsize=(15, 6))
@@ -496,7 +505,7 @@ class BipartiteGraph:
         plt.text(3, (len(self.rows)+(len(self.rows)*0.05)), 'Susceptible', fontsize=12, ha='right', va='center', color='black')
         plt.text(len(self.columns)-2, (len(self.rows)+(len(self.rows)*0.05)), 'Resistant', fontsize=12, ha='left', va='center', color='black')
         # save the figure in the heatmaps folder
-        # get matrix name before the first underscore
+        # title variable is the name of the predictions file without the .tsv
         plt.savefig('Heatmaps/Heatmap_' + self.title + '_' + 'predictions' if self.probability is False else 'probabiltiies' + '.png')
         plt.show()
 

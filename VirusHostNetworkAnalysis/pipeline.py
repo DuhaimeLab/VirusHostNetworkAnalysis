@@ -45,97 +45,6 @@ class Pipeline():
         # Use 10 times the number of edges in the prediction matrix as the number of swaps
         self.num_swaps = self.prediction_matrix.virus_host_array.sum() * 10
 
-    def find_num_swaps(self):
-        """ Find the number of swaps to use for the null model.
-        This is done by running the null model with a number of swaps and plotting the results.
-        """
-        nodf_swaps = []
-        eigen_host = []
-        eigen_virus = []
-        closeness_host = []
-        closeness_virus = []
-
-
-        prediction_properties = BipartiteGraph(self.prediction_matrix)
-        nodf_swaps.append(prediction_properties.run_parallel(self.num_cores))
-        cm = ConfigurationModel(self.prediction_matrix)
-        for i in range(0, self.num_runs):
-            # Perform num_swaps swaps to create the null model
-            cm.bootstrap_swaps(self.num_swaps)
-            # Create the properties object for the null model
-            cm_properties = BipartiteGraph(cm)
-            # Calculate the properties
-            nodf_swaps.append(cm_properties.run_parallel(8))
-            cm_properties.calculate_centrality(algorithm="eigenvector")
-            closeness_host.append(mean(cm_properties.eigenvector_host.values()))
-            closeness_virus.append(mean(cm_properties.eigenvector_virus.values()))
-            cm_properties.calculate_centrality(algorithm="closeness")
-            eigen_host.append(mean(cm_properties.closeness_host.values()))
-            eigen_virus.append(mean(cm_properties.closeness_virus.values()))
-            print(i)
-        # line graph of the nodf_swaps
-        plt.plot(nodf_swaps)
-        plt.xlabel(f"Iteration ({self.num_swaps} swaps each)")
-        plt.ylabel("NODF")
-
-        # plot as a distribution
-        # plt.figure()
-        # plt.hist(nodf_swaps, color='skyblue')
-        # plt.xlabel("NODF")
-        # plt.ylabel("Frequency")
-        # plt.title("NODF Distribution")
-        # # add a vertical line at the nodf for the prediction matrix
-        # plt.axvline(x=nodf_swaps[0], color='r', linestyle='--', label='Prediction Matrix NODF')
-
-        # centrality
-        plt.figure()
-        plt.plot(eigen_host, label="Host")
-        plt.xlabel("Swap #")
-        plt.ylabel("Host Eigenvector Centrality")
-        # new figure
-        plt.figure()
-        plt.plot(eigen_virus, label="Virus")
-        plt.xlabel("Swap #")
-        plt.ylabel("Virus Eigenvector Centrality")
-
-        # plt.figure()
-        # plt.hist(eigen_host, color='skyblue')
-        # plt.xlabel("Eigenvector Host")
-        # plt.ylabel("Frequency")
-        # plt.title("Eigenvector Host Distribution")
-        # plt.axvline(x=eigen_host[0], color='r', linestyle='--')
-        # plt.figure()
-        # plt.hist(eigen_virus, color='skyblue')
-        # plt.xlabel("Eigenvector Virus")
-        # plt.ylabel("Frequency")
-        # plt.title("Eigenvector Virus Distribution")
-        # plt.axvline(x=eigen_virus[0], color='r', linestyle='--')
-
-
-        # new figure
-        plt.figure()
-        plt.plot(closeness_host, label="Host")
-        plt.xlabel("Swap #")
-        plt.ylabel("Host Closeness Centrality")
-        # new figure
-        plt.figure()
-        plt.plot(closeness_virus, label="Virus")
-        plt.xlabel("Swap #")
-        plt.ylabel("Virus Closeness Centrality")
-
-        # plt.figure()
-        # plt.hist(closeness_host, color='skyblue')
-        # plt.xlabel("Closeness Host")
-        # plt.ylabel("Frequency")
-        # plt.title("Closeness Host Distribution")
-        # plt.axvline(x=closeness_host[0], color='r', linestyle='--')
-        # plt.figure()
-        # plt.hist(closeness_virus, color='skyblue')
-        # plt.xlabel("Closeness Virus")
-        # plt.ylabel("Frequency")
-        # plt.title("Closeness Virus Distribution")
-        # plt.axvline(x=closeness_virus[0], color='r', linestyle='--')
-
     def pipeline_steps_prediction(self):
         """ Run the pipeline for the VirusHostNetworkAnalysis. """
         # PREDICTION MATRIX
@@ -371,7 +280,11 @@ class Pipeline():
             df["Betweenness Centrality"] = [val for val in (self.virus_metrics['betweenness'][i] + self.host_metrics['betweenness'][i])]
             df["Closeness Centrality"] = [val for val in (self.virus_metrics['closeness'][i] + self.host_metrics['closeness'][i])]
             # Save df to csv
-            df.to_csv(f"{directory}/{file_name}/centrality_measures_prediction.csv", index=False)
+            if i == 0:
+                df.to_csv(f"{directory}/{file_name}/centrality_measures_prediction.csv", index=False)
+            else:
+                # Save the dataframe to a csv file in a new folder titled "file_name" in the directory
+                df.to_csv(f"{directory}/{file_name}/centrality_measures_null_{i}.csv", index=False)
 
     def export_pipeline_data(self, directory:str, file_name:str):
         """ Save the data from the prediction and null models into tables.

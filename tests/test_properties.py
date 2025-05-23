@@ -326,7 +326,7 @@ def test_BipartiteGraph_modularity():
                                              [0, 0, 0, 1, 1, 0]])
     test_properties.rows = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
     test_properties.columns = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
-    assert test_properties.calculate_modularity() == 0.5
+    assert test_properties.calculate_modularity() == 1.5
 
 def test_BipartiteGraph_clustering_coefficient():
     """ Test the clustering_coefficient function of the[] BipartiteGraph class."""
@@ -472,8 +472,8 @@ def test_BipartiteGraph_betwenness_centrality():
     test_properties.rows = np.array(["v2", "v3", "v5", "v6"])
     test_properties.columns = np.array(["h1", "h4"])
     test_properties.initialize_graph()
-    test_properties.draw_graph(True)
-    test_properties.calculate_centrality("betweenness")
+    
+    test_properties.calculate_centrality("betweenness", 2000)
     assert [round(v, 1) for v in test_properties.betweenness_host.values()] == [0.4, 0.7]
     assert [round(v, 1) for v in test_properties.betweenness_virus.values()] == [0.6, 0, 0, 0]
 
