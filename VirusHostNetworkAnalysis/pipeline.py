@@ -88,7 +88,7 @@ class Pipeline():
             # Map methods to their corresponding functions
             cm_methods = {
                 "swap": lambda: self.null_model.bootstrap_swaps(self.num_swaps),
-                "shuffle": lambda: self.null_model.suffle_cm(self.percent_shuffle_v, self.percent_shuffle_h),
+                "shuffle": lambda: self.null_model.shuffle_cm(self.percent_shuffle_v, self.percent_shuffle_h),
                 "curveball": lambda: self.null_model.curveball_method(self.num_swaps)
             }
             # Execute the selected method

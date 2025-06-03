@@ -63,3 +63,10 @@ def test_filling_correctly_prob():
     test_matrix.fill_matrix()
     # assert that matrix contains only floats between 0 and 1
     assert test_matrix.virus_host_array.all() >= 0 and test_matrix.virus_host_array.all() <= 1
+
+def test_make_rectangular_matrix():
+    """Test that the rectangular matrix is created correctly"""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv')
+    test_matrix.make_rectangular_matrix()
+    # check that the matrix is the correct size
+    assert len(test_matrix.virus_host_array) == len(test_matrix.virus_host_array[0])

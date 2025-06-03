@@ -1,6 +1,8 @@
 # change directory to one level up
 import os
 import sys
+
+import test
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
@@ -61,7 +63,7 @@ def test_ConfigurationModel_shuffle_degrees():
     assert (sorted(test_properties.calculate_degree()[1]) == sorted(test_cm_properties.calculate_degree()[1]))
 
 def test_ConfigurationModel_curveball_degrees():
-    """Test the shuffle degrees of the ConfigurationModel."""
+    """Test the degrees of nodes in the ConfigurationModel after running the curveball method to confirm that degree distribution did not change."""
     test_matrix = PredictionMatrix('tests/test_predictions.tsv')
     test_matrix.make_rectangular_matrix()
     test_properties = BipartiteGraph(test_matrix)
@@ -69,3 +71,14 @@ def test_ConfigurationModel_curveball_degrees():
     test_config.curveball_method(10)
     test_cm_properties = BipartiteGraph(test_config)
     assert (sorted(test_properties.calculate_degree()) == sorted(test_cm_properties.calculate_degree()))
+
+def test_ConfigurationModel_curveball_degrees_large():
+    """Test the degrees of nodes in the ConfigurationModel after running the curveball method to confirm that degree distribution did not change."""
+    aug4 = PredictionMatrix('Sample_Input/Aug4_predictions.tsv')
+    aug4.make_rectangular_matrix()
+    aug4_properties = BipartiteGraph(aug4)
+    aug4_cm = ConfigurationModel(aug4)
+    aug4_cm.curveball_method(10)
+    aug4_cm_properties = BipartiteGraph(aug4_cm)
+    assert (sorted(aug4_properties.calculate_degree()[0]) == sorted(aug4_cm_properties.calculate_degree()[0]))
+    assert (sorted(aug4_properties.calculate_degree()[1]) == sorted(aug4_cm_properties.calculate_degree()[1]))
