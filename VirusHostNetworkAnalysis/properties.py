@@ -278,7 +278,7 @@ class BipartiteGraph:
 
         return [virus_degrees, host_degrees]        
 
-    def plot_degree_distribution(self):
+    def plot_degree_distribution(self, title):
         """ Plot the degree distribution of the graph. """
         # Calculate the degree of each node in the graph
         degree_seq = self.calculate_degree()
@@ -286,18 +286,21 @@ class BipartiteGraph:
         # Divide into two lists, one for virus and one for host
         virus_degree = degree_seq[0]
         host_degree = degree_seq[1]
+        # Convert degrees to percentages
+        # virus_degree = [d / max(degree_seq[0]) for d in degree_seq[0]]
+        # host_degree = [d / max(degree_seq[1]) for d in degree_seq[1]] 
 
         # Plot histograms for virus and host degree distributions
         # Virus distribution is green and host distribution is blue
         sns.kdeplot(virus_degree, color='g', fill=True) 
-        plt.title('Virus Degree Distribution')
+        plt.title(title + ' Virus Degree Distribution')
         plt.xlabel('Degree')
         plt.ylabel('Frequency')
         plt.grid()
         plt.show()
 
         sns.kdeplot(host_degree, color='dodgerblue', fill=True)
-        plt.title('Host Degree Distribution')
+        plt.title(title + ' Host Degree Distribution')
         plt.xlabel('Degree')
         plt.ylabel('Frequency')
         plt.grid()
@@ -309,8 +312,10 @@ class BipartiteGraph:
         degree_seq = self.calculate_degree()
         plt.figure(figsize=(10, 6))
         # Divide into two lists, one for virus and one for host
-        virus_degree = degree_seq[0]
-        host_degree = degree_seq[1]
+        # virus_degree = degree_seq[0]
+        # host_degree = degree_seq[1]
+        virus_degree = [d / max(degree_seq[0]) for d in degree_seq[0]]
+        host_degree = [d / max(degree_seq[1]) for d in degree_seq[1]] 
 
         # dictionary of virus names and their corresponding degree
         virus_dict = {self.rows[i]: virus_degree[i] for i in range(len(virus_degree))}
@@ -331,9 +336,9 @@ class BipartiteGraph:
         axis[0].set_xlabel('Virus')
         axis[0].set_ylabel('Degree')
         # Add Generalist and Specialist labels
-        axis[0].text(-0.5, -2, 'Generalist', fontsize=12, ha='right', va='center', color='black')
-        axis[0].text(len(virus_dict)-0.5, -2, 'Specialist', fontsize=12, ha='left', va='center', color='black')
-        axis[0].grid()
+        # axis[0].text(-0.5, -2, 'Generalist', fontsize=12, ha='right', va='center', color='black')
+        # axis[0].text(len(virus_dict)-0.5, -2, 'Specialist', fontsize=12, ha='left', va='center', color='black')
+        # axis[0].grid()
 
         # plot host name on x axis and corresponding degree on y axis
         # dot plot for host
@@ -342,11 +347,11 @@ class BipartiteGraph:
         axis[1].set_xticks([])
         axis[1].set_title('Host Degree Distribution')
         axis[1].set_xlabel('Host')
-        axis[1].set_ylabel('Degree')
+        axis[1].set_ylabel('Percentage of Viruses Interacting')
         # Add Generalist and Specialist labels
-        axis[1].text(-0.5, 0, 'Susceptible', fontsize=12, ha='right', va='center', color='black')
-        axis[1].text(len(host_dict)-0.5, -10, 'Resistant', fontsize=12, ha='left', va='center', color='black')
-        axis[1].grid()
+        # axis[1].text(-0.5, 0, 'Susceptible', fontsize=12, ha='right', va='center', color='black')
+        # axis[1].text(len(host_dict)-0.5, -10, 'Resistant', fontsize=12, ha='left', va='center', color='black')
+        # axis[1].grid()
 
        
     def plot_eigenvector_centrality(self, ax1, ax2):

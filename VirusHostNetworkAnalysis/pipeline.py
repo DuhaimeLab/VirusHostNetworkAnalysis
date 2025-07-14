@@ -170,11 +170,13 @@ class Pipeline():
 
     def visualize_degree_distribution(self):
         """ Plot the degree distribution of the prediction matrix. """
-        self.prediction_properties.plot_degree_distribution()
+        type = "Predicted"
+        self.prediction_properties.plot_degree_distribution(type)
 
     def visualize_degree_distribution_null(self):
         """ Plot the degree distribution of the prediction matrix. """
-        self.null_properties.plot_degree_distribution()
+        type = "Null"
+        self.null_properties.plot_degree_distribution(type)
 
     def visualize_degree_by_species(self):
         """ Plot the degree by species of the prediction matrix. """
