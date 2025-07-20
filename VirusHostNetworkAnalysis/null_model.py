@@ -64,6 +64,35 @@ class ER:
         nx.draw(self.G, pos, with_labels= True if include_label is True else False, node_color=node_color,
                 node_size = 100) 
 
+class ShufflingModel:
+    def __init__(self, PredictionMatrix):
+        """Initialize the ShufflingModel with the given prediction matrix.
+
+        Args:
+            PredictionMatrix (PredictionMatrix): A class that contains the true virus-host interaction matrix, row names, and column names.
+        """
+        self.virus_host_array = PredictionMatrix.virus_host_array
+        self.rows = PredictionMatrix.rows
+        self.columns = PredictionMatrix.columns
+
+    def shuffle_matrix(self):
+        """Shuffle the matrix by randomly swapping rows and columns.
+
+        Returns:
+            np.ndarray: The shuffled matrix with the randomly assigned virus-host interactions.
+        """
+
+        # determine the number of 1s in the matrix
+        num_ones = np.sum(self.virus_host_array)
+        # create a new matrix with all zeros
+        shuffled_matrix = np.zeros_like(self.virus_host_array)
+        # randomly distribute the 1s in the new matrix
+        indices = np.random.choice(
+            np.arange(self.virus_host_array.size), num_ones, replace=False
+        )
+        shuffled_matrix.flat[indices] = 1
+        self.virus_host_array = shuffled_matrix
+        return shuffled_matrix
 
 class ConfigurationModel:
     """ Class to create a random graph using the Configuration Model. 

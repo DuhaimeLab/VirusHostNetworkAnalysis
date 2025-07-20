@@ -1,3 +1,5 @@
+import re
+from isort import file
 import matplotlib
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -689,7 +691,7 @@ class BipartiteGraph:
     
 
     # Calculate modularity
-    def calculate_modularity(self):
+    def calculate_modularity(self, title:str):
         """ Calculate the modularity of the graph. 
         
         Returns:
@@ -700,10 +702,11 @@ class BipartiteGraph:
         im = infomap.Infomap()
         im.add_networkx_graph(self.G)
         im.run()
-        self.modularity = im.get_modules()
-        # get average modularity
-        self.modularity = np.mean(list(self.modularity.values()))
-        return self.modularity
+        file_name = title + "_modularity.csv"
+        im.write_csv(file_name)
+        # self.modularity = im.get_modules()
+        # # get average modularity
+        # self.modularity = np.mean(list(self.modularity.values()))
     
     # Plot modularity
     def plot_modularity(self, modules):
@@ -762,4 +765,43 @@ class BipartiteGraph:
             float: The average number of hosts per virus.
         """
         return np.count_nonzero(self.input_matrix) / len(self.input_matrix)
+    
+    def calculate_components(self):
+        """ Calculate the number of connected components in the graph.
+        Returns:
+            int: The number of connected components in the graph.
+        """
+        self.initialize_graph()
+        if nx.is_connected(self.G):
+            return 1
+        else:
+            largest_cc = max(nx.connected_components(self.G), key=len)
+            self.subgraph = self.G.subgraph(largest_cc)
+            return nx.number_connected_components(self.G)
+    
+    # Calculate the diameter of the graph
+    def calculate_diameter(self):
+        """ Calculate the diameter of the graph. 
+        
+        Returns:
+            float: The diameter of the graph.
+        """
+        self.initialize_graph()
+        if nx.is_connected(self.G):
+            return nx.diameter(self.G)
+        else:
+            return nx.diameter(self.subgraph)
+    
+    def calculate_average_shortest_path_length(self):
+        """ Calculate the average shortest path length of the graph. 
+        
+        Returns:
+            float: The average shortest path length of the graph.
+        """
+        self.initialize_graph()
+        if nx.is_connected(self.G):
+            return nx.average_shortest_path_length(self.G)
+        else:
+            return nx.average_shortest_path_length(self.subgraph)
+            
     

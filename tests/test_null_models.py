@@ -2,10 +2,9 @@
 import os
 import sys
 
-import test
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
-from VirusHostNetworkAnalysis.null_model import ConfigurationModel
+from VirusHostNetworkAnalysis.null_model import ConfigurationModel, ShufflingModel
 from VirusHostNetworkAnalysis.null_model import ER
 from VirusHostNetworkAnalysis.properties import BipartiteGraph
 
@@ -82,3 +81,14 @@ def test_ConfigurationModel_curveball_degrees_large():
     aug4_cm_properties = BipartiteGraph(aug4_cm)
     assert (sorted(aug4_properties.calculate_degree()[0]) == sorted(aug4_cm_properties.calculate_degree()[0]))
     assert (sorted(aug4_properties.calculate_degree()[1]) == sorted(aug4_cm_properties.calculate_degree()[1]))
+
+def test_ShuffleMethod():
+    """Test the shuffling method"""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv')
+    test_matrix.make_rectangular_matrix()
+    test_shuffle = ShufflingModel(test_matrix)
+    test_shuffle.shuffle_matrix()
+    # checl that the number of edges is the same
+    assert (sum(test_matrix.virus_host_array.flatten()) == sum(test_shuffle.virus_host_array.flatten()))
+    # check that the shape is the same
+    assert (test_matrix.virus_host_array.shape == test_shuffle.virus_host_array.shape)
