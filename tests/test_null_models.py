@@ -88,7 +88,16 @@ def test_ShuffleMethod():
     test_matrix.make_rectangular_matrix()
     test_shuffle = ShufflingModel(test_matrix)
     test_shuffle.shuffle_matrix()
-    # checl that the number of edges is the same
+    # check that the number of edges is the same
     assert (sum(test_matrix.virus_host_array.flatten()) == sum(test_shuffle.virus_host_array.flatten()))
     # check that the shape is the same
     assert (test_matrix.virus_host_array.shape == test_shuffle.virus_host_array.shape)
+
+    test_matrix_large = PredictionMatrix('Sample_Input/Aug4_predictions.tsv')
+    test_matrix_large.make_rectangular_matrix()
+    test_shuffle_large = ShufflingModel(test_matrix_large)
+    test_shuffle_large.shuffle_matrix()
+    # check that the number of edges is the same
+    assert (sum(test_matrix_large.virus_host_array.flatten()) == sum(test_shuffle_large.virus_host_array.flatten()))
+    # check that the shape is the same
+    assert (test_matrix_large.virus_host_array.shape == test_shuffle_large.virus_host_array.shape)

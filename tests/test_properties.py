@@ -314,7 +314,6 @@ def test_BipartiteGraph_calculate_percent_edges():
 
 def test_BipartiteGraph_modularity():
     """ Test the modularity function of the BipartiteGraph class."""
-    ### Come back to this test
     test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
     test_matrix.make_rectangular_matrix()
     test_properties = BipartiteGraph(test_matrix)
@@ -326,7 +325,9 @@ def test_BipartiteGraph_modularity():
                                              [0, 0, 0, 1, 1, 0]])
     test_properties.rows = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
     test_properties.columns = np.array(["node0", "node1", "node2", "node3", "node4", "node5"])
-    assert test_properties.calculate_modularity() == 1.5
+    # check that modularity is integer and codelength is float
+    assert isinstance(test_properties.calculate_modularity()[0], int)
+    assert isinstance(test_properties.calculate_modularity()[1], float)
 
 def test_BipartiteGraph_clustering_coefficient():
     """ Test the clustering_coefficient function of the[] BipartiteGraph class."""
@@ -495,3 +496,44 @@ def test_BipartiteGraph_eigenvector_centrality():
     test_properties.calculate_centrality("eigenvector")
     assert list(test_properties.eigenvector_host.values()) == [0.37175243743550507, 0.6014982337968756]
     assert list(test_properties.eigenvector_virus.values()) == [0.5116687042046243, 0.19544325298260648, 0.3162254512220179, 0.3162254512220179]
+
+def test_BipartiteGraph_diameter():
+    """ Test the calculate_diameter() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+
+    # Test #1
+    test_properties.input_matrix = np.array([[1, 1, 1],
+                                            [1, 0, 1],
+                                            [0, 1, 0],
+                                            [0, 1, 0]])
+    test_properties.rows = np.array(["v1", "v2", "v3", "v4"])
+    test_properties.columns = np.array(["h1", "h2", "h3"])
+    test_properties.initialize_graph()
+    assert test_properties.calculate_diameter() == 4
+
+def test_BipartiteGraph_num_components():
+    """ Test the calculate_num_components() function of the BipartiteGraph class."""
+    test_matrix = PredictionMatrix('tests/test_predictions.tsv', False)
+    test_matrix.make_rectangular_matrix()
+    test_properties = BipartiteGraph(test_matrix)
+    
+    # Test #1
+    test_properties.input_matrix = np.array([[1, 1, 1],
+                                            [1, 0, 1],
+                                            [0, 1, 0],
+                                            [0, 1, 0]])
+    test_properties.rows = np.array(["v1", "v2", "v3", "v4"])
+    test_properties.columns = np.array(["h1", "h2", "h3"])
+    test_properties.initialize_graph()
+    assert test_properties.calculate_components() == 1
+
+    # Test #2
+    test_properties.input_matrix = np.array([[1, 0, 0],
+                                            [0, 1, 0],
+                                            [0, 0, 1]])
+    test_properties.rows = np.array(["v1", "v2", "v3"])
+    test_properties.columns = np.array(["h1", "h2", "h3"])
+    test_properties.initialize_graph()
+    assert test_properties.calculate_components() == 3

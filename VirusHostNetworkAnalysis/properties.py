@@ -1,5 +1,3 @@
-import re
-from isort import file
 import matplotlib
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -691,22 +689,21 @@ class BipartiteGraph:
     
 
     # Calculate modularity
-    def calculate_modularity(self, title:str):
-        """ Calculate the modularity of the graph. 
-        
+    def calculate_modularity(self):
+        """Calculate the modularity of the graph.
+
         Returns:
             modularity (float): The modularity of the graph.
+            codelength (float): The codelength of the graph.
         """
         self.initialize_graph()
         # Use the Infomap algorithm to calculate modularity
         im = infomap.Infomap()
         im.add_networkx_graph(self.G)
         im.run()
-        file_name = title + "_modularity.csv"
-        im.write_csv(file_name)
-        # self.modularity = im.get_modules()
-        # # get average modularity
-        # self.modularity = np.mean(list(self.modularity.values()))
+        self.modularity = im.num_top_modules
+        self.codelength = im.codelength
+        return self.modularity, self.codelength
     
     # Plot modularity
     def plot_modularity(self, modules):
@@ -772,12 +769,12 @@ class BipartiteGraph:
             int: The number of connected components in the graph.
         """
         self.initialize_graph()
-        if nx.is_connected(self.G):
-            return 1
-        else:
-            largest_cc = max(nx.connected_components(self.G), key=len)
-            self.subgraph = self.G.subgraph(largest_cc)
-            return nx.number_connected_components(self.G)
+        # if nx.is_connected(self.G):
+        #     return 1
+        # else:
+        largest_cc = max(nx.connected_components(self.G), key=len)
+        self.subgraph = self.G.subgraph(largest_cc)
+        return nx.number_connected_components(self.G)
     
     # Calculate the diameter of the graph
     def calculate_diameter(self):

@@ -1,4 +1,3 @@
-from calendar import c
 from VirusHostNetworkAnalysis.prediction_matrix import PredictionMatrix
 from VirusHostNetworkAnalysis.null_model import ConfigurationModel
 from VirusHostNetworkAnalysis.null_model import ER
@@ -6,7 +5,6 @@ from VirusHostNetworkAnalysis.null_model import ShufflingModel
 from VirusHostNetworkAnalysis.properties import BipartiteGraph
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-from statistics import mean
 import pandas as pd
 import os
 
@@ -94,10 +92,9 @@ class Pipeline:
         )
 
         # Modularity
-        file_name =  "test_prediction"
-        modularity = self.prediction_properties.calculate_modularity(file_name)
-        self.modularity.append(modularity)
-        print("Modularity: ", modularity)
+        modularity_val, codelength_val = self.prediction_properties.calculate_modularity()
+        self.modularity.append(modularity_val)
+        self.codelength.append(codelength_val)
 
          # Number of connected components
         components = self.prediction_properties.calculate_components()
@@ -144,6 +141,11 @@ class Pipeline:
         # Nestedness
         nest = self.null_properties.run_parallel(self.num_cores)
         self.nestedness.append(nest)
+
+        # Modularity
+        modularity_val, codelength_val = self.null_properties.calculate_modularity()
+        self.modularity.append(modularity_val)
+        self.codelength.append(codelength_val)
 
         # Number of connected components
         self.num_components.append(self.null_properties.calculate_components())
@@ -196,6 +198,7 @@ class Pipeline:
         }
         self.nestedness = []
         self.modularity = []
+        self.codelength = []
         self.num_components = []
         self.diameter = []
         self.average_path_length = []
@@ -357,6 +360,12 @@ class Pipeline:
 
         # Add a column for the average path length
         df["Average Shortest Path Length"] = self.average_path_length
+
+        # Add a column for modularity
+        df["Modularity"] = self.modularity
+
+        # Add a column for codelength
+        df["Codelength"] = self.codelength
 
         # Save the dataframe to a csv file in a new folder titled "file_name" in the directory
         df.to_csv(f"{directory}/{file_name}/nestedness.csv", index=False)
