@@ -698,7 +698,7 @@ class BipartiteGraph:
         """
         self.initialize_graph()
         # Use the Infomap algorithm to calculate modularity
-        im = infomap.Infomap()
+        im = infomap.Infomap(silent=True)
         im.add_networkx_graph(self.G)
         im.run()
         self.modularity = im.num_top_modules
